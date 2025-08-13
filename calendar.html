@@ -742,14 +742,10 @@
             document.getElementById('loading').style.display = 'block';
             
             try {
-                // Fetch tournament data from Railway API with CORS mode
+                // Fetch tournament data from Railway API - simplified to avoid preflight
                 const response = await fetch(API_URL, {
                     method: 'GET',
-                    mode: 'cors',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
+                    mode: 'cors'
                 });
                 
                 if (!response.ok) {
