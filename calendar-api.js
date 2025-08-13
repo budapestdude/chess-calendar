@@ -32,7 +32,15 @@ app.use((req, res, next) => {
 });
 
 app.use(express.json());
-app.use(express.static(__dirname));
+
+// Serve static files with CORS headers
+app.use(express.static(__dirname, {
+  setHeaders: (res, path) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET');
+    res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+  }
+}));
 
 // Get all events or filter by query parameters
 app.get('/api/events', (req, res) => {

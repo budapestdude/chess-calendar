@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Calendar - Static Version</title>
+</head>
+<body>
+    <h1>Chess Tournament Calendar</h1>
+    <div id="loading">Loading...</div>
+    <div id="error" style="display:none; color: red;"></div>
+    <div id="events"></div>
+
+    <script>
+        // Try multiple endpoints in order of preference
+        const endpoints = [
+            'https://adventurous-bravery-production.up.railway.app/events.json',
+            'https://adventurous-bravery-production.up.railway.app/api/events?limit=500',
+            '/events.json' // Fallback to local if hosted on same domain
+        ];
+
+        async function loadEvents() {
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const eventsDiv = document.getElementById('events');
+            
+            for (const endpoint of endpoints) {
+                try {
+                    console.log(`Trying endpoint: ${endpoint}`);
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        console.log(`Failed to fetch from ${endpoint}: ${response.status}`);
+                        continue;
+                    }
+                    
+                    const data = await response.json();
+                    console.log(`Successfully loaded data from ${endpoint}`);
+                    
+                    // Handle both formats (direct array or object with data property)
+                    const events = data.data || data;
+                    
+                    loadingDiv.style.display = 'none';
+                    displayEvents(events);
+                    return; // Success, exit the function
+                    
+                } catch (error) {
+                    console.error(`Error fetching from ${endpoint}:`, error);
+                    continue; // Try next endpoint
+                }
+            }
+            
+            // If we get here, all endpoints failed
+            loadingDiv.style.display = 'none';
+            errorDiv.style.display = 'block';
+            errorDiv.textContent = 'Failed to load tournament data from all endpoints. Please try again later.';
+        }
+
+        function displayEvents(events) {
+            const eventsDiv = document.getElementById('events');
+            
+            // Filter for special events
+            const specialEvents = events.filter(event => {
+                return event.special === 'yes' || event.special === 'Yes' || !event.special;
+            });
+            
+            // Group by month
+            const eventsByMonth = {};
+            specialEvents.forEach(event => {
+                const date = new Date(event.start_datetime);
+                const month = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                
+                if (!eventsByMonth[month]) {
+                    eventsByMonth[month] = [];
+                }
+                eventsByMonth[month].push(event);
+            });
+            
+            // Display events
+            let html = '';
+            Object.keys(eventsByMonth).sort().forEach(month => {
+                html += `<h2>${month}</h2>`;
+                html += '<ul>';
+                eventsByMonth[month].forEach(event => {
+                    const startDate = new Date(event.start_datetime).toLocaleDateString();
+                    const endDate = new Date(event.end_datetime).toLocaleDateString();
+                    html += `
+                        <li>
+                            <strong>${event.title}</strong><br>
+                            📍 ${event.location || 'TBD'}<br>
+                            📅 ${startDate} - ${endDate}<br>
+                            ${event.url ? `<a href="${event.url}" target="_blank">View Details</a>` : ''}
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+            });
+            
+            eventsDiv.innerHTML = html || '<p>No events found.</p>';
+        }
+
+        // Load events when page loads
+        document.addEventListener('DOMContentLoaded', loadEvents);
+    </script>
+</body>
+</html>
