@@ -810,15 +810,19 @@
                 console.log("First data row:", data[0]);
             }
             
-            // Show all events if special field doesn't exist, otherwise filter
+            // Filter to show ONLY events where special = "yes"
             const specialEvents = data.filter(row => {
-                // If there's no special field in the data, show all events
-                if (!('special' in row)) {
-                    return true;
-                }
                 const special = row.special ? row.special.trim().toLowerCase() : "";
-                return special === "yes" || special === "true" || special === "";
+                // Only show events explicitly marked as special
+                return special === "yes";
             });
+            
+            console.log(`Filtered ${specialEvents.length} special events from ${data.length} total events`);
+            
+            // If no special events found, check the data format
+            if (specialEvents.length === 0) {
+                console.log("No special events found. Sample data:", data.slice(0, 3));
+            }
             
             specialEvents.forEach(row => {
                 // Map API fields to our expected format
