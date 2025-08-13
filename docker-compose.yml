@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: calendar-db
+    environment:
+      POSTGRES_USER: calendar_user
+      POSTGRES_PASSWORD: your_secure_password_here
+      POSTGRES_DB: calendar_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  api:
+    build: ./api
+    container_name: calendar-api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://calendar_user:your_secure_password_here@postgres:5432/calendar_db
+      JWT_SECRET: your_jwt_secret_here
+      NODE_ENV: production
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

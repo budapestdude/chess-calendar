@@ -1,0 +1,5 @@
+Name,Location,Start date,End date,URL,Type,Format,Continent,Players
+"Valid Tournament","Paris - France","2025-10-01","2025-10-05","https://chess.com/valid","Open","Classical","Europe","Carlsen"
+"Missing URL Tournament","Berlin - Germany","2025-10-10","2025-10-12","","Swiss","Rapid","Europe","Kramnik"
+"Invalid Date Tournament","Madrid - Spain","Not a date","2025-10-20","https://chess.com/invalid","Open","Blitz","Europe","Caruana"
+"Another Valid Tournament","Tokyo - Japan","2025-11-01","2025-11-03","https://chess.com/valid2","Invitational","Classical","Asia","Nakamura"

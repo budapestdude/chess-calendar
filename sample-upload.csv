@@ -1,0 +1,4 @@
+Name,Location,Start date,End date,URL,Type,Format,Continent,Players,Description
+"Sample Tournament 1","New York - USA","2025-09-01","2025-09-05","https://chess.com/tournament1","Open","Classical","North America","Magnus Carlsen, Hikaru Nakamura","Test tournament 1"
+"Sample Tournament 2","London - England","2025-09-10","2025-09-12","https://chess.com/tournament2","Invitational","Rapid","Europe","Fabiano Caruana, Ian Nepomniachtchi","Test tournament 2"
+"Sample Tournament 3","Mumbai - India","2025-09-15","2025-09-20","https://chess.com/tournament3","Swiss","Classical","Asia","Viswanathan Anand, Gukesh D","Test tournament 3"

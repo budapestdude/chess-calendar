@@ -1,0 +1,21 @@
+{
+  "name": "calendar-database",
+  "version": "1.0.0",
+  "description": "A robust, scalable calendar database solution to replace Google Sheets for multi-platform access.",
+  "main": "import-chess-calendar.js",
+  "scripts": {
+    "start": "node calendar-api.js",
+    "dev": "node calendar-api.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "express": "^4.21.2"
+  }
+}
