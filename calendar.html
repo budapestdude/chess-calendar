@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The 2025 Top Chess Tournament Calendar</title>
+    <style>
+        /* Main Styles - Matching landing page */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.5s ease;
+        }
+        
+        /* Accessibility styles */
+        .visually-hidden, .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #d4af37;
+            color: black;
+            padding: 8px;
+            z-index: 100;
+            transition: top 0.3s;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        /* Focus styles for keyboard navigation */
+        a:focus, button:focus, input:focus, select:focus {
+            outline: 3px solid #2c3e50;
+            outline-offset: 2px;
+        }
+        
+        /* Powered by Chessdom button */
+        .powered-by {
+            display: inline-block;
+            margin: 20px auto 0;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+        
+        .powered-by:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chess-calendar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Enhanced Header Styles - Matching landing page */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            border-bottom: none;
+            position: relative;
+            transform: translateY(0);
+            transition: transform 0.5s ease;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjUgMjVMNTAgNTBMMjUgNzVMNTAgMTAwTDc1IDc1TDUwIDUwTDc1IDI1TDUwIDBMMjUgMjVaIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDUpIiAvPjwvc3ZnPg==');
+            background-size: 100px 100px;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-header h1 {
+            color: #ffffff;
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .page-header h1::before,
+        .page-header h1::after {
+            content: '★'; /* Changed to star symbol for top events */
+            font-size: 2rem;
+            margin: 0 15px;
+            color: #d4af37;
+            vertical-align: middle;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* Search and Filter controls */
+        .controls-container {
+            margin-bottom: 25px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-container {
+            margin-bottom: 15px;
+        }
+        
+        #searchBox {
+            width: 70%;
+            padding: 12px;
+            border: 2px solid #d4af37;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        #searchBox:focus {
+            outline: none;
+            border-color: #2c3e50;
+            box-shadow: 0 0 10px rgba(44, 62, 80, 0.3);
+        }
+        
+        .month-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .month-buttons button {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .month-buttons button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Contact Button - Styled to match landing page */
+        .contact-button {
+            display: block;
+            margin: 20px auto 25px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white !important;
+            font-weight: bold;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none !important;
+            max-width: 80%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .contact-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .contact-button::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: #d4af37;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .contact-button:hover::after {
+            width: 70%;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        caption {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px;
+            color: #2c3e50;
+            text-align: left;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border: none;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:nth-child(odd):not(.month-divider) {
+            background-color: #ffffff;
+        }
+        
+        tr:hover:not(.month-divider) {
+            background-color: #f0f7ff;
+        }
+        
+        /* Month divider styles */
+        .month-divider {
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+            position: relative;
+        }
+        
+        .month-divider td {
+            padding: 12px 15px;
+            border: none;
+        }
+        
+        .month-divider td::before {
+            content: '★'; /* Changed to star symbol for top events */
+            margin-right: 10px;
+            color: #d4af37;
+            text-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* All events are special events by definition */
+        tr:not(.month-divider) {
+            background: linear-gradient(135deg, #fff9c4 0%, #fffde7 100%) !important;
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid #d4af37 !important;
+        }
+        
+        tr:not(.month-divider):hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(212, 175, 55, 0.3);
+        }
+        
+        tr:not(.month-divider) td {
+            border-color: #fff9c4;
+        }
+        
+        tr:not(.month-divider) td:first-child::before {
+            content: "★";
+            color: #d4af37;
+            margin-right: 8px;
+            font-size: 1.1em;
+            text-shadow: 0 0 3px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* URLs */
+        td a {
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            padding: 6px 12px;
+            border: 2px solid #2c3e50;
+            border-radius: 6px;
+        }
+        
+        td a:hover {
+            background-color: #2c3e50;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Loading indicator for data fetch only */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .loading-spinner {
+            font-size: 3rem;
+            color: #d4af37;
+            animation: bounce 1s infinite alternate;
+        }
+        
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-20px); }
+        }
+        
+        /* Error message styling */
+        .error-message {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+            text-align: left;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Theme Toggle - UPDATED */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .theme-toggle.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background: #3a506b;
+        }
+        
+        /* Dark Theme */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+        
+        body.dark-theme .controls-container,
+        body.dark-theme .table-container {
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+        }
+        
+        body.dark-theme .page-header {
+            background: linear-gradient(135deg, #121921, #2a3a50);
+        }
+        
+        body.dark-theme tr:nth-child(even):not(.month-divider) {
+            background-color: #333333;
+        }
+        
+        body.dark-theme tr:nth-child(odd):not(.month-divider) {
+            background-color: #2d2d2d;
+        }
+        
+        body.dark-theme tr:hover:not(.month-divider) {
+            background-color: #3a3a3a;
+        }
+        
+        body.dark-theme .month-divider {
+            background: linear-gradient(135deg, #121921, #2a3a50);
+        }
+        
+        body.dark-theme tr:not(.month-divider) {
+            background: linear-gradient(135deg, #433b10, #3a3522) !important;
+            border-left: 4px solid #d4af37 !important;
+        }
+        
+        body.dark-theme #searchBox {
+            background-color: #333333;
+            color: #f0f0f0;
+            border-color: #4a6491;
+        }
+        
+        body.dark-theme td a {
+            color: #d4af37;
+            border-color: #d4af37;
+        }
+        
+        body.dark-theme td a:hover {
+            background-color: #d4af37;
+            color: #1a1a1a;
+        }
+        
+        body.dark-theme caption {
+            color: #f0f0f0;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .page-header h1 {
+                font-size: 2.8rem;
+            }
+            
+            #searchBox {
+                width: 80%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .page-header h1::before,
+            .page-header h1::after {
+                font-size: 1.8rem;
+                margin: 0 10px;
+            }
+            
+            .month-buttons {
+                gap: 5px;
+            }
+            
+            .month-buttons button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            
+            #searchBox {
+                width: 90%;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .page-header h1::before,
+            .page-header h1::after {
+                font-size: 1.5rem;
+                margin: 0 8px;
+            }
+            
+            .month-buttons button {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+            
+            /* Adjust theme toggle button for mobile */
+            .theme-toggle {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .theme-toggle span {
+                display: none; /* Hide text on smaller screens */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .page-header h1::before,
+            .page-header h1::after {
+                display: block;
+                margin: 10px auto;
+            }
+            
+            .contact-button {
+                font-size: 0.9rem;
+                padding: 12px 20px;
+            }
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+    <!-- Skip Link for keyboard users -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
+        <i class="fas fa-moon" aria-hidden="true"></i>
+        <span>Dark Mode</span>
+    </button>
+    
+    <main id="main-content" class="chess-calendar-container">
+        <header class="page-header" role="banner">
+            <div class="header-content">
+                <h1 id="calendar-heading">The 2025 Top Chess Tournament Calendar</h1>
+                <a href="https://www.chessdom.com" class="powered-by" target="_blank">Powered by Chessdom</a>
+            </div>
+        </header>
+        
+        <div class="controls-container" role="search">
+            <div class="search-container">
+                <label for="searchBox" class="visually-hidden">Search tournaments</label>
+                <input type="text" id="searchBox" placeholder="🔍 Search tournaments by name, player, location..." onkeyup="filterTournaments()" aria-describedby="search-description">
+                <p id="search-description" class="visually-hidden">As you type, the table will automatically filter to show matching tournaments</p>
+            </div>
+            
+            <div class="month-buttons" role="group" aria-label="Filter tournaments by month">
+                <button onclick="filterByMonth(1)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> January</button>
+                <button onclick="filterByMonth(2)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> February</button>
+                <button onclick="filterByMonth(3)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> March</button>
+                <button onclick="filterByMonth(4)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> April</button>
+                <button onclick="filterByMonth(5)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> May</button>
+                <button onclick="filterByMonth(6)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> June</button>
+                <button onclick="filterByMonth(7)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> July</button>
+                <button onclick="filterByMonth(8)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> August</button>
+                <button onclick="filterByMonth(9)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> September</button>
+                <button onclick="filterByMonth(10)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> October</button>
+                <button onclick="filterByMonth(11)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> November</button>
+                <button onclick="filterByMonth(12)" aria-pressed="false"><i class="fas fa-calendar-day" aria-hidden="true"></i> December</button>
+                <button onclick="resetFilters()"><i class="fas fa-sync-alt" aria-hidden="true"></i> Show All</button>
+            </div>
+        </div>
+        
+        <!-- Live region for announcing filter results -->
+        <div class="sr-only" aria-live="polite" id="filter-status"></div>
+        
+        <a href="https://calendar.chessdom.com/contact/" class="contact-button">
+            <i class="fas fa-envelope" aria-hidden="true"></i> Want to see your tournament on our calendar? Contact us here.
+        </a>
+        
+        <div id="loading" class="loading" aria-live="polite" role="status">
+            <div class="loading-spinner" aria-hidden="true">★</div>
+            <p>Loading tournament data...</p>
+        </div>
+        
+        <div id="errorMessage" class="error-message" aria-live="assertive" role="alert"></div>
+        
+        <div class="table-container" role="region" aria-labelledby="calendar-heading">
+            <p id="table-description" class="visually-hidden">The table below lists chess tournaments for 2025, organized by month, showing name, location, dates, type, format, and website link.</p>
+            <table aria-describedby="table-description">
+                <caption class="visually-hidden">Chess Tournaments Calendar 2025</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Location</th>
+                        <th scope="col">Start Date</th>
+                        <th scope="col">End Date</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Format</th>
+                        <th scope="col">URL</th>
+                    </tr>
+                </thead>
+                <tbody id="tournamentTable"></tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const icon = themeToggle.querySelector('i');
+            const text = themeToggle.querySelector('span');
+            
+            // Check for saved theme preference
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                body.classList.add('dark-theme');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                text.textContent = 'Light Mode';
+                themeToggle.setAttribute('aria-pressed', 'true');
+            }
+            
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-theme');
+                const isDark = body.classList.contains('dark-theme');
+                
+                if (isDark) {
+                    icon.classList.replace('fa-moon', 'fa-sun');
+                    text.textContent = 'Light Mode';
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.setAttribute('aria-pressed', 'true');
+                } else {
+                    icon.classList.replace('fa-sun', 'fa-moon');
+                    text.textContent = 'Dark Mode';
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.setAttribute('aria-pressed', 'false');
+                }
+                
+                // Announce theme change
+                document.getElementById('filter-status').textContent = 
+                    isDark ? 'Dark mode enabled.' : 'Light mode enabled.';
+            });
+            
+            // Scroll event to hide/show the theme toggle button
+            let lastScrollTop = 0;
+            
+            window.addEventListener('scroll', function() {
+                const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Hide button when scrolling down, show when scrolling up
+                if (currentScrollTop > lastScrollTop && currentScrollTop > 100) {
+                    // Scrolling down & past threshold
+                    themeToggle.classList.add('hidden');
+                } else if (currentScrollTop < lastScrollTop || currentScrollTop < 50) {
+                    // Scrolling up or near top
+                    themeToggle.classList.remove('hidden');
+                }
+                
+                lastScrollTop = currentScrollTop;
+            });
+            
+            // Add ripple effect to buttons
+            const buttons = document.querySelectorAll('.month-buttons button, .contact-button');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const x = e.clientX - e.target.getBoundingClientRect().left;
+                    const y = e.clientY - e.target.getBoundingClientRect().top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.width = '100px';
+                    ripple.style.height = '100px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    ripple.style.transform = 'translate(-50%, -50%) scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    
+                    button.style.position = 'relative';
+                    button.style.overflow = 'hidden';
+                    button.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Add ripple effect styles dynamically
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: translate(-50%, -50%) scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Fetch tournament data on page load
+            fetchTournaments();
+        });
+        
+        // Add debugging controls
+        window.debugMode = false;
+        function debugLog(...args) {
+            if (window.debugMode) {
+                console.log(...args);
+            }
+        }
+
+        // Railway API endpoint
+        const API_URL = 'https://adventurous-bravery-production.up.railway.app/api/events?limit=500';
+
+        async function fetchTournaments() {
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                // Fetch tournament data from Railway API
+                const response = await fetch(API_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const apiResponse = await response.json();
+                
+                // Process the API data
+                processTournamentData(apiResponse.data);
+                
+                // Hide error message if it was previously shown
+                document.getElementById('errorMessage').style.display = 'none';
+                
+            } catch (error) {
+                console.error("Failed to load tournaments", error);
+                displayError(`Error loading tournament data: ${error.message}. Please try again later or contact support.`);
+            }
+        }
+
+        function displayError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            // Hide loading indicator
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function processTournamentData(data) {
+            const tournamentTable = document.getElementById("tournamentTable");
+            tournamentTable.innerHTML = "";
+            
+            // Group tournaments by month
+            const tournamentsByMonth = {};
+            
+            // Debug the data structure
+            console.log("Data received:", data.length, "rows");
+            if (data.length > 0) {
+                console.log("First data row:", data[0]);
+            }
+            
+            // Filter to show only special events (where special = "yes" or Special = "yes")
+            const specialEvents = data.filter(row => {
+                const special = row.special ? row.special.trim().toLowerCase() : "";
+                return special === "yes" || special === "true";
+            });
+            
+            specialEvents.forEach(row => {
+                // Map API fields to our expected format
+                const eventName = row.title ? row.title.trim() : "";
+                const location = row.location ? row.location.trim() : "";
+                const startDate = row.start_datetime ? new Date(row.start_datetime).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : "";
+                const endDate = row.end_datetime ? new Date(row.end_datetime).toLocaleDateString('en-US', { month: 'long', day: 'numeric' }) : "";
+                const type = row.event_type ? row.event_type.trim() : "";
+                const format = row.format ? row.format.trim() : "";
+                const url = row.url ? row.url.trim() : "";
+                
+                // Skip events with empty URL
+                if (!url) {
+                    return;
+                }
+                
+                // New invisible but searchable columns
+                const continent = row.continent ? row.continent.trim() : "";
+                const players = row.players ? row.players.trim() : "";
+                const category = row.category ? row.category.trim() : "";
+                
+                // Debug output for player data
+                if (players && players.length > 0) {
+                    console.log(`Row data for ${eventName}: Players = "${players}"`);
+                }
+                
+                // Extract month from the date format
+                const parsedStartDate = startDate ? new Date(row.start_datetime) : null;
+                const month = parsedStartDate ? parsedStartDate.toLocaleDateString('en-US', { month: 'long' }) : "";
+                
+                if (!tournamentsByMonth[month]) {
+                    tournamentsByMonth[month] = [];
+                }
+                
+                tournamentsByMonth[month].push({
+                    eventName,
+                    location,
+                    startDate: row.start_datetime,
+                    formattedStartDate: startDate,
+                    formattedEndDate: endDate,
+                    type,
+                    format,
+                    url,
+                    continent,
+                    players,
+                    category
+                });
+            });
+            
+            // Sort months
+            const monthOrder = {
+                "January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6,
+                "July": 7, "August": 8, "September": 9, "October": 10, "November": 11, "December": 12
+            };
+            
+            const sortedMonths = Object.keys(tournamentsByMonth).sort((a, b) => monthOrder[a] - monthOrder[b]);
+            
+            // Display tournaments grouped by month with dividers
+            sortedMonths.forEach(month => {
+                const tournaments = tournamentsByMonth[month];
+                
+                // Skip months with no tournaments
+                if (tournaments.length === 0) {
+                    return;
+                }
+                
+                // Add month divider row
+                const dividerRow = document.createElement('tr');
+                dividerRow.className = 'month-divider';
+                dividerRow.setAttribute('data-month', month);
+                dividerRow.setAttribute('role', 'rowheader');
+                dividerRow.innerHTML = `<td colspan="7" id="month-${month.toLowerCase()}">${month}</td>`;
+                tournamentTable.appendChild(dividerRow);
+                
+                // Add tournament rows
+                tournaments.forEach((tournament, index) => {
+                    const { eventName, location, formattedStartDate, formattedEndDate, type, format, url, continent, players, category } = tournament;
+                    
+                    const newRow = document.createElement('tr');
+                    newRow.setAttribute('data-start', tournament.startDate);
+                    newRow.setAttribute('data-month', month);
+                    newRow.setAttribute('data-continent', continent);
+                    newRow.setAttribute('data-players', players);
+                    newRow.setAttribute('data-category', category);
+                    newRow.setAttribute('aria-labelledby', `month-${month.toLowerCase()}`);
+                    
+                    // Debug log for player data
+                    if (players && players.length > 0) {
+                        console.log(`Tournament: ${eventName}, Players: ${players}`);
+                    }
+                    
+                    // Create the row content with proper accessibility
+                    newRow.innerHTML = `
+                        <td>${eventName.includes('World') ? ' ' : ''}<span aria-hidden="true">★ </span>${eventName}</td>
+                        <td><i class="fas fa-map-marker-alt" aria-hidden="true"></i> ${location}</td>
+                        <td><i class="fas fa-calendar" aria-hidden="true"></i> <span class="visually-hidden">Start Date: </span>${formattedStartDate}</td>
+                        <td><i class="fas fa-calendar-check" aria-hidden="true"></i> <span class="visually-hidden">End Date: </span>${formattedEndDate}</td>
+                        <td><span class="visually-hidden">Type: </span>${type}</td>
+                        <td><span class="visually-hidden">Format: </span>${format}</td>
+                        <td>${url ? `<a href="${url}" target="_blank" aria-label="Visit website for ${eventName}"><i class="fas fa-external-link-alt" aria-hidden="true"></i> Visit</a>` : ''}</td>
+                    `;
+                    
+                    tournamentTable.appendChild(newRow);
+                });
+            });
+            
+            // Check if we have any special events
+            const totalEvents = Object.values(tournamentsByMonth).reduce((acc, month) => acc + month.length, 0);
+            
+            if (totalEvents === 0) {
+                const errorMsg = document.getElementById('errorMessage');
+                errorMsg.textContent = "No top chess events found in the calendar data.";
+                errorMsg.style.display = 'block';
+            } else {
+                // Announce number of events loaded
+                document.getElementById('filter-status').textContent = 
+                    `Calendar loaded successfully with ${totalEvents} tournaments.`;
+            }
+            
+            // Hide loading indicator
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Parse the custom date format (e.g., "January 10th")
+        function parseCustomDate(dateStr) {
+            if (!dateStr) return { month: "", day: "" };
+            
+            // Match format like "January 10th" or "February 3rd"
+            const dateParts = dateStr.match(/(\w+)\s+(\d+)(?:st|nd|rd|th)?/);
+            if (!dateParts) return { month: "", day: "" };
+            
+            const month = dateParts[1];
+            const day = dateParts[2];
+            return { month, day };
+        }
+
+        // Format the date as "January 10" (no ordinal)
+        function formatCustomDate(dateStr) {
+            if (!dateStr) return "";
+            
+            const parsed = parseCustomDate(dateStr);
+            if (!parsed.month || !parsed.day) return dateStr;
+            
+            return `${parsed.month} ${parsed.day}`;
+        }
+
+        function filterTournaments() {
+            const searchValue = document.getElementById("searchBox").value.toLowerCase();
+            const rows = document.querySelectorAll("#tournamentTable tr");
+            let currentMonthHasVisibleTournaments = false;
+            let previousMonthHasVisibleTournaments = false;
+            let visibleTournamentCount = 0;
+            
+            rows.forEach(row => {
+                if (row.classList.contains('month-divider')) {
+                    // This is a month divider row
+                    const month = row.getAttribute('data-month');
+                    currentMonthHasVisibleTournaments = false;
+                    
+                    // Check if any tournament in this month matches the search
+                    let nextRow = row.nextElementSibling;
+                    while (nextRow && !nextRow.classList.contains('month-divider')) {
+                        // Check visible text
+                        if (nextRow.innerText.toLowerCase().includes(searchValue)) {
+                            currentMonthHasVisibleTournaments = true;
+                            break;
+                        }
+                        
+                        // Also check data attributes for invisible searchable fields
+                        const continent = nextRow.getAttribute('data-continent') || '';
+                        const players = nextRow.getAttribute('data-players') || '';
+                        const category = nextRow.getAttribute('data-category') || '';
+                        
+                        if (continent.toLowerCase().includes(searchValue) || 
+                            players.toLowerCase().includes(searchValue) ||
+                            category.toLowerCase().includes(searchValue)) {
+                            currentMonthHasVisibleTournaments = true;
+                            break;
+                        }
+                        
+                        nextRow = nextRow.nextElementSibling;
+                    }
+                    
+                    // Show divider if either:
+                    // 1. It's the first month and has tournaments, or
+                    // 2. Previous month had tournaments or current month has tournaments
+                    const shouldShowDivider = currentMonthHasVisibleTournaments || 
+                                           (previousMonthHasVisibleTournaments && row.previousElementSibling);
+                    
+                    row.style.display = shouldShowDivider ? "" : "none";
+                    previousMonthHasVisibleTournaments = currentMonthHasVisibleTournaments;
+                } else {
+                    // This is a tournament row
+                    // Check visible text first
+                    const containsSearchTerm = row.innerText.toLowerCase().includes(searchValue);
+                    
+                    // Also check hidden fields with null checks and proper string handling
+                    const continent = row.getAttribute('data-continent') || '';
+                    const players = row.getAttribute('data-players') || '';
+                    const category = row.getAttribute('data-category') || '';
+                    
+                    // Check if the search matches either hidden field
+                    const matchesInvisibleFields = 
+                        continent.toLowerCase().includes(searchValue) || 
+                        players.toLowerCase().includes(searchValue) ||
+                        category.toLowerCase().includes(searchValue);
+                    
+                    // Show the row if either visible or invisible fields match
+                    const isVisible = containsSearchTerm || matchesInvisibleFields;
+                    row.style.display = isVisible ? "" : "none";
+                    
+                    if (isVisible) {
+                        visibleTournamentCount++;
+                    }
+                }
+            });
+            
+            // Update the live region with search results
+            const searchStatusText = searchValue.length > 0
+                ? `Showing ${visibleTournamentCount} tournaments matching '${searchValue}'.`
+                : `Showing all tournaments.`;
+            
+            document.getElementById("filter-status").textContent = searchStatusText;
+        }
+
+        function filterByMonth(monthNum) {
+            const rows = document.querySelectorAll("#tournamentTable tr");
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const selectedMonth = monthNames[monthNum - 1];
+            let visibleCount = 0;
+            
+            rows.forEach(row => {
+                const month = row.getAttribute('data-month');
+                
+                if (row.classList.contains('month-divider')) {
+                    // Show divider only if it's the selected month
+                    row.style.display = (month === selectedMonth) ? "" : "none";
+                } else {
+                    // Show tournament only if it's in the selected month
+                    const isVisible = (month === selectedMonth);
+                    row.style.display = isVisible ? "" : "none";
+                    if (isVisible) {
+                        visibleCount++;
+                    }
+                }
+            });
+            
+            // Update ARIA states for buttons
+            document.querySelectorAll('.month-buttons button').forEach((btn, index) => {
+                // Reset all buttons first
+                btn.style.background = 'linear-gradient(135deg, #2c3e50, #4a6491)';
+                btn.setAttribute('aria-pressed', 'false');
+                
+                // Set the selected month button
+                if (index === monthNum - 1) {
+                    btn.style.backgroundColor = '#d4af37';
+                    btn.setAttribute('aria-pressed', 'true');
+                }
+            });
+            
+            // Announce filter results
+            document.getElementById("filter-status").textContent = 
+                `Showing ${visibleCount} tournaments in ${selectedMonth}.`;
+        }
+
+        function resetFilters() {
+            const rows = document.querySelectorAll("#tournamentTable tr");
+            document.getElementById("searchBox").value = "";
+            let totalCount = 0;
+            
+            rows.forEach(row => {
+                row.style.display = "";
+                if (!row.classList.contains('month-divider')) {
+                    totalCount++;
+                }
+            });
+            
+            // Reset all month button colors and ARIA states
+            document.querySelectorAll('.month-buttons button').forEach(btn => {
+                btn.style.background = 'linear-gradient(135deg, #2c3e50, #4a6491)';
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            
+            // Announce reset
+            document.getElementById("filter-status").textContent = 
+                `Filters reset. Showing all ${totalCount} tournaments.`;
+                
+            // Return focus to search box
+            document.getElementById("searchBox").focus();
+        }
+    </script>
+</body>
+</html>
