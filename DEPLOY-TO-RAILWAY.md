@@ -35,7 +35,7 @@ git commit -m "Initial chess calendar project"
 
 ```bash
 # Add GitHub as remote (replace YOUR_USERNAME)
-git remote add origin https://github.com/YOUR_USERNAME/chess-calendar.git
+git remote add origin https://github.com/budapestdude/chess-calendar.git
 
 # Push to GitHub
 git branch -M main
