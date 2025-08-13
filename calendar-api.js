@@ -8,7 +8,13 @@ const PORT = process.env.PORT || 3000;
 const DB_PATH = process.env.NODE_ENV === 'production' ? '/app/calendar.db' : 'calendar.db';
 const db = new Database(DB_PATH, { readonly: false });
 
-app.use(cors());
+// Enhanced CORS configuration to allow all origins
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.static(__dirname));
 

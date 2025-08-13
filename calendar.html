@@ -742,17 +742,32 @@
             document.getElementById('loading').style.display = 'block';
             
             try {
-                // Fetch tournament data from Railway API
-                const response = await fetch(API_URL);
+                // Fetch tournament data from Railway API with CORS mode
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    mode: 'cors',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 
                 const apiResponse = await response.json();
+                console.log('API Response:', apiResponse); // Debug log
                 
-                // Process the API data
-                processTournamentData(apiResponse.data);
+                // Check if data exists and is an array
+                if (apiResponse.data && Array.isArray(apiResponse.data)) {
+                    processTournamentData(apiResponse.data);
+                } else if (Array.isArray(apiResponse)) {
+                    // Handle if API returns array directly
+                    processTournamentData(apiResponse);
+                } else {
+                    throw new Error('Invalid data format received from API');
+                }
                 
                 // Hide error message if it was previously shown
                 document.getElementById('errorMessage').style.display = 'none';
@@ -784,10 +799,14 @@
                 console.log("First data row:", data[0]);
             }
             
-            // Filter to show only special events (where special = "yes" or Special = "yes")
+            // Show all events if special field doesn't exist, otherwise filter
             const specialEvents = data.filter(row => {
+                // If there's no special field in the data, show all events
+                if (!('special' in row)) {
+                    return true;
+                }
                 const special = row.special ? row.special.trim().toLowerCase() : "";
-                return special === "yes" || special === "true";
+                return special === "yes" || special === "true" || special === "";
             });
             
             specialEvents.forEach(row => {
