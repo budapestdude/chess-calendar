@@ -734,7 +734,8 @@
             }
         }
 
-        // Railway endpoints - try static JSON first, then API
+        // Multiple endpoints - GitHub Pages first (most reliable), then Railway
+        const GITHUB_PAGES_URL = 'https://budapestdude.github.io/chess-calendar/events.json';
         const STATIC_JSON_URL = 'https://adventurous-bravery-production.up.railway.app/events.json';
         const API_URL = 'https://adventurous-bravery-production.up.railway.app/api/events?limit=500';
 
@@ -742,8 +743,8 @@
             // Show loading indicator
             document.getElementById('loading').style.display = 'block';
             
-            // Try static JSON first, then fall back to API
-            const endpoints = [STATIC_JSON_URL, API_URL];
+            // Try GitHub Pages first (most reliable), then Railway options
+            const endpoints = [GITHUB_PAGES_URL, STATIC_JSON_URL, API_URL];
             
             for (const url of endpoints) {
                 try {
