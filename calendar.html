@@ -734,44 +734,58 @@
             }
         }
 
-        // Railway API endpoint
+        // Railway endpoints - try static JSON first, then API
+        const STATIC_JSON_URL = 'https://adventurous-bravery-production.up.railway.app/events.json';
         const API_URL = 'https://adventurous-bravery-production.up.railway.app/api/events?limit=500';
 
         async function fetchTournaments() {
             // Show loading indicator
             document.getElementById('loading').style.display = 'block';
             
-            try {
-                // Fetch tournament data from Railway API - simplified to avoid preflight
-                const response = await fetch(API_URL, {
-                    method: 'GET',
-                    mode: 'cors'
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+            // Try static JSON first, then fall back to API
+            const endpoints = [STATIC_JSON_URL, API_URL];
+            
+            for (const url of endpoints) {
+                try {
+                    console.log(`Attempting to fetch from: ${url}`);
+                    
+                    // Fetch tournament data - simplified to avoid preflight
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    
+                    if (!response.ok) {
+                        console.log(`Failed with status: ${response.status}, trying next endpoint...`);
+                        continue; // Try next endpoint
+                    }
+                    
+                    const apiResponse = await response.json();
+                    console.log('Response received:', apiResponse); // Debug log
+                    
+                    // Check if data exists and is an array
+                    if (apiResponse.data && Array.isArray(apiResponse.data)) {
+                        processTournamentData(apiResponse.data);
+                    } else if (Array.isArray(apiResponse)) {
+                        // Handle if API returns array directly
+                        processTournamentData(apiResponse);
+                    } else {
+                        console.log('Invalid data format, trying next endpoint...');
+                        continue; // Try next endpoint
+                    }
+                    
+                    // Hide error message if it was previously shown
+                    document.getElementById('errorMessage').style.display = 'none';
+                    return; // Success! Exit the function
+                    
+                } catch (error) {
+                    console.error(`Failed to load from ${url}:`, error);
+                    // Continue to next endpoint
                 }
-                
-                const apiResponse = await response.json();
-                console.log('API Response:', apiResponse); // Debug log
-                
-                // Check if data exists and is an array
-                if (apiResponse.data && Array.isArray(apiResponse.data)) {
-                    processTournamentData(apiResponse.data);
-                } else if (Array.isArray(apiResponse)) {
-                    // Handle if API returns array directly
-                    processTournamentData(apiResponse);
-                } else {
-                    throw new Error('Invalid data format received from API');
-                }
-                
-                // Hide error message if it was previously shown
-                document.getElementById('errorMessage').style.display = 'none';
-                
-            } catch (error) {
-                console.error("Failed to load tournaments", error);
-                displayError(`Error loading tournament data: ${error.message}. Please try again later or contact support.`);
             }
+            
+            // If we get here, all endpoints failed
+            displayError(`Error loading tournament data. Please try again later or contact support.`);
         }
 
         function displayError(message) {
