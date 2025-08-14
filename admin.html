@@ -291,6 +291,10 @@
         </div>
         
         <div id="adminContent" class="hidden">
+            <div style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                <span>✓ Authenticated successfully</span>
+                <button class="btn btn-sm" style="background: #6c757d; color: white;" onclick="logout()">Logout</button>
+            </div>
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('view')">View Events</button>
                 <button class="tab" onclick="switchTab('add')">Add Event</button>
@@ -600,8 +604,14 @@
         }
         
         async function editEvent(id) {
+            if (!checkAuth()) return;
+            
             try {
-                const response = await fetch(`${API_BASE}/api/events/${id}`);
+                const response = await fetch(`${API_BASE}/api/events/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
                 const data = await response.json();
                 const event = data.data;
                 
@@ -671,7 +681,14 @@
                     loadEvents();
                 } else {
                     const error = await response.json();
-                    alert('Error: ' + error.error);
+                    if (response.status === 401) {
+                        alert('Authentication error! Your session may have expired. Please refresh the page and authenticate again.');
+                        document.getElementById('authSection').classList.remove('hidden');
+                        document.getElementById('adminContent').classList.add('hidden');
+                        authToken = '';
+                    } else {
+                        alert('Error: ' + error.error);
+                    }
                 }
             } catch (error) {
                 alert('Error updating event: ' + error.message);
@@ -698,7 +715,14 @@
                     loadEvents();
                 } else {
                     const error = await response.json();
-                    alert('Error: ' + error.error);
+                    if (response.status === 401) {
+                        alert('Authentication error! Your session may have expired. Please refresh the page and authenticate again.');
+                        document.getElementById('authSection').classList.remove('hidden');
+                        document.getElementById('adminContent').classList.add('hidden');
+                        authToken = '';
+                    } else {
+                        alert('Error: ' + error.error);
+                    }
                 }
             } catch (error) {
                 alert('Error deleting event: ' + error.message);
@@ -806,6 +830,16 @@
                 return false;
             }
             return true;
+        }
+        
+        // Logout function
+        function logout() {
+            authToken = '';
+            document.getElementById('adminContent').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('authToken').value = '';
+            document.getElementById('authStatus').innerHTML = '';
+            alert('Logged out successfully');
         }
     </script>
 </body>
