@@ -296,6 +296,10 @@
             
             <!-- View Events Tab -->
             <div id="viewTab" class="content-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h3>All Events</h3>
+                    <span id="eventCount" style="color: #666; font-size: 14px;"></span>
+                </div>
                 <div class="search-bar">
                     <input type="text" id="searchInput" placeholder="Search events..." onkeyup="searchEvents()">
                     <select id="filterContinent" onchange="filterEvents()">
@@ -477,10 +481,14 @@
         
         async function loadEvents() {
             try {
-                const response = await fetch(`${API_BASE}/api/events?limit=500`);
+                const response = await fetch(`${API_BASE}/api/events?limit=2000`);
                 const data = await response.json();
-                allEvents = data.data;
+                allEvents = data.data || [];
                 displayEvents(allEvents);
+                
+                // Update event count display
+                document.getElementById('eventCount').textContent = `Total: ${allEvents.length} events`;
+                console.log(`Loaded ${allEvents.length} events`);
             } catch (error) {
                 console.error('Error loading events:', error);
             }

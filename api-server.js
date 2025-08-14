@@ -60,6 +60,12 @@ app.get('/api/events', (req, res) => {
       params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
     
+    // Get total count before applying limit
+    const countQuery = query.replace('SELECT *', 'SELECT COUNT(*) as count');
+    const countStmt = db.prepare(countQuery);
+    const countResult = countStmt.get(...params);
+    const totalCount = countResult.count;
+    
     query += ' ORDER BY start_datetime ASC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), parseInt(offset));
     
@@ -69,7 +75,8 @@ app.get('/api/events', (req, res) => {
     res.json({
       success: true,
       data: events,
-      total: events.length
+      total: totalCount,
+      returned: events.length
     });
   } catch (error) {
     console.error('Error fetching events:', error);
