@@ -282,9 +282,12 @@
         
         <div class="auth-section" id="authSection">
             <strong>Authentication Required:</strong>
-            <input type="password" id="authToken" placeholder="Enter admin token">
+            <input type="password" id="authToken" placeholder="Enter admin token (default: your-secret-admin-token-2025)">
             <button class="btn btn-primary" onclick="authenticate()">Authenticate</button>
             <span id="authStatus"></span>
+            <div style="margin-top: 10px; font-size: 12px; color: #856404;">
+                ⚠️ Default token: <code>your-secret-admin-token-2025</code> (Set ADMIN_TOKEN env var in production)
+            </div>
         </div>
         
         <div id="adminContent" class="hidden">
@@ -569,7 +572,13 @@
                     loadEvents();
                 } else {
                     const error = await response.json();
-                    alert('Error: ' + error.error);
+                    if (response.status === 401) {
+                        alert('Authentication required! Please enter the admin token at the top of the page.\n\nDefault token: your-secret-admin-token-2025');
+                        document.getElementById('authSection').classList.remove('hidden');
+                        document.getElementById('adminContent').classList.add('hidden');
+                    } else {
+                        alert('Error: ' + error.error);
+                    }
                 }
             } catch (error) {
                 alert('Error adding event: ' + error.message);
