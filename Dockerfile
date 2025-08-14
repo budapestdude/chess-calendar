@@ -25,4 +25,4 @@ COPY calendar.db ./
 EXPOSE 3000
 
 # Start the application
-CMD ["node", "simple-server.js"]
+CMD ["node", "api-server.js"]

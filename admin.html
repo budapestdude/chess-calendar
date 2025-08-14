@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Calendar Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .auth-section {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .auth-section input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            width: 300px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+        
+        .content-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .events-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .events-table th {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .events-table td {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .events-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .special-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Chess Calendar Admin Panel</h1>
+            <p>Manage chess tournament database</p>
+        </div>
+        
+        <div class="auth-section" id="authSection">
+            <strong>Authentication Required:</strong>
+            <input type="password" id="authToken" placeholder="Enter admin token">
+            <button class="btn btn-primary" onclick="authenticate()">Authenticate</button>
+            <span id="authStatus"></span>
+        </div>
+        
+        <div id="adminContent" class="hidden">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('view')">View Events</button>
+                <button class="tab" onclick="switchTab('add')">Add Event</button>
+                <button class="tab" onclick="switchTab('import')">Bulk Import</button>
+            </div>
+            
+            <!-- View Events Tab -->
+            <div id="viewTab" class="content-section">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search events..." onkeyup="searchEvents()">
+                    <select id="filterContinent" onchange="filterEvents()">
+                        <option value="">All Continents</option>
+                        <option value="Europe">Europe</option>
+                        <option value="Asia">Asia</option>
+                        <option value="Americas">Americas</option>
+                        <option value="Africa">Africa</option>
+                        <option value="Oceania">Oceania</option>
+                    </select>
+                    <select id="filterFormat" onchange="filterEvents()">
+                        <option value="">All Formats</option>
+                        <option value="Classical">Classical</option>
+                        <option value="Rapid">Rapid</option>
+                        <option value="Blitz">Blitz</option>
+                        <option value="Bullet">Bullet</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="loadEvents()">Refresh</button>
+                </div>
+                
+                <div id="eventsTableContainer"></div>
+            </div>
+            
+            <!-- Add Event Tab -->
+            <div id="addTab" class="content-section hidden">
+                <form id="addEventForm" onsubmit="addEvent(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Title *</label>
+                            <input type="text" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="location">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Date *</label>
+                            <input type="datetime-local" name="start_datetime" required>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="datetime-local" name="end_datetime">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>URL *</label>
+                            <input type="url" name="url" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Special Event</label>
+                            <select name="special">
+                                <option value="">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Continent</label>
+                            <select name="continent">
+                                <option value="">Select...</option>
+                                <option value="Europe">Europe</option>
+                                <option value="Asia">Asia</option>
+                                <option value="Americas">Americas</option>
+                                <option value="Africa">Africa</option>
+                                <option value="Oceania">Oceania</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Format</label>
+                            <select name="format">
+                                <option value="">Select...</option>
+                                <option value="Classical">Classical</option>
+                                <option value="Rapid">Rapid</option>
+                                <option value="Blitz">Blitz</option>
+                                <option value="Bullet">Bullet</option>
+                                <option value="Freestyle">Freestyle</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Event Type</label>
+                            <input type="text" name="event_type">
+                        </div>
+                        <div class="form-group">
+                            <label>Rounds</label>
+                            <input type="number" name="rounds">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Players</label>
+                        <textarea name="players" placeholder="List of notable players"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">Add Event</button>
+                </form>
+            </div>
+            
+            <!-- Import Tab -->
+            <div id="importTab" class="content-section hidden">
+                <h3>Bulk Import from CSV</h3>
+                <p>Upload a CSV file with tournament data</p>
+                <input type="file" id="csvFile" accept=".csv">
+                <button class="btn btn-primary" onclick="importCSV()">Import CSV</button>
+                <div id="importResults"></div>
+            </div>
+        </div>
+        
+        <!-- Edit Modal -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Edit Event</h2>
+                    <span class="close-modal" onclick="closeEditModal()">&times;</span>
+                </div>
+                <form id="editEventForm" onsubmit="updateEvent(event)">
+                    <input type="hidden" id="editEventId">
+                    <!-- Form fields will be populated dynamically -->
+                    <div id="editFormFields"></div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn" onclick="closeEditModal()">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let authToken = '';
+        const API_BASE = window.location.origin;
+        
+        function authenticate() {
+            authToken = document.getElementById('authToken').value;
+            
+            // Test authentication
+            fetch(`${API_BASE}/api/events`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('adminContent').classList.remove('hidden');
+                    document.getElementById('authStatus').textContent = '✓ Authenticated';
+                    loadEvents();
+                } else {
+                    document.getElementById('authStatus').textContent = '✗ Invalid token';
+                }
+            });
+        }
+        
+        function switchTab(tab) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide content
+            document.getElementById('viewTab').classList.toggle('hidden', tab !== 'view');
+            document.getElementById('addTab').classList.toggle('hidden', tab !== 'add');
+            document.getElementById('importTab').classList.toggle('hidden', tab !== 'import');
+        }
+        
+        async function loadEvents() {
+            try {
+                const response = await fetch(`${API_BASE}/api/events?limit=500`);
+                const data = await response.json();
+                displayEvents(data.data);
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+        
+        function displayEvents(events) {
+            const container = document.getElementById('eventsTableContainer');
+            
+            if (!events || events.length === 0) {
+                container.innerHTML = '<p>No events found</p>';
+                return;
+            }
+            
+            let html = `
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Format</th>
+                            <th>Special</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            events.forEach(event => {
+                const startDate = new Date(event.start_datetime).toLocaleDateString();
+                html += `
+                    <tr>
+                        <td>${event.title}</td>
+                        <td>${event.location || '-'}</td>
+                        <td>${startDate}</td>
+                        <td>${event.format || '-'}</td>
+                        <td>${event.special === 'yes' ? '<span class="special-badge">SPECIAL</span>' : ''}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="editEvent(${event.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+        
+        async function addEvent(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const eventData = Object.fromEntries(formData);
+            
+            // Format datetime
+            if (eventData.start_datetime) {
+                eventData.start_datetime = eventData.start_datetime.replace('T', ' ') + ':00';
+            }
+            if (eventData.end_datetime) {
+                eventData.end_datetime = eventData.end_datetime.replace('T', ' ') + ':00';
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/events`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(eventData)
+                });
+                
+                if (response.ok) {
+                    alert('Event added successfully!');
+                    e.target.reset();
+                    switchTab('view');
+                    loadEvents();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error adding event: ' + error.message);
+            }
+        }
+        
+        async function editEvent(id) {
+            try {
+                const response = await fetch(`${API_BASE}/api/events/${id}`);
+                const data = await response.json();
+                const event = data.data;
+                
+                document.getElementById('editEventId').value = id;
+                
+                // Populate edit form
+                const fields = `
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" name="title" value="${event.title}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" name="location" value="${event.location || ''}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>URL</label>
+                            <input type="url" name="url" value="${event.url}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Special</label>
+                            <select name="special">
+                                <option value="" ${event.special !== 'yes' ? 'selected' : ''}>No</option>
+                                <option value="yes" ${event.special === 'yes' ? 'selected' : ''}>Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Players</label>
+                        <textarea name="players">${event.players || ''}</textarea>
+                    </div>
+                `;
+                
+                document.getElementById('editFormFields').innerHTML = fields;
+                document.getElementById('editModal').style.display = 'block';
+                
+            } catch (error) {
+                alert('Error loading event: ' + error.message);
+            }
+        }
+        
+        async function updateEvent(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('editEventId').value;
+            const formData = new FormData(e.target);
+            const eventData = Object.fromEntries(formData);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/events/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(eventData)
+                });
+                
+                if (response.ok) {
+                    alert('Event updated successfully!');
+                    closeEditModal();
+                    loadEvents();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error updating event: ' + error.message);
+            }
+        }
+        
+        async function deleteEvent(id) {
+            if (!confirm('Are you sure you want to delete this event?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/events/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('Event deleted successfully!');
+                    loadEvents();
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                alert('Error deleting event: ' + error.message);
+            }
+        }
+        
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        
+        function searchEvents() {
+            // Implement search functionality
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('.events-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+        
+        function filterEvents() {
+            // Implement filter functionality
+            loadEvents(); // For now, just reload
+        }
+        
+        // Check if already authenticated (for development)
+        if (window.location.hostname === 'localhost') {
+            document.getElementById('authToken').value = 'your-secret-admin-token-2025';
+        }
+    </script>
+</body>
+</html>

@@ -2,10 +2,11 @@
   "name": "calendar-database",
   "version": "1.0.0",
   "description": "A robust, scalable calendar database solution to replace Google Sheets for multi-platform access.",
-  "main": "simple-server.js",
+  "main": "api-server.js",
   "scripts": {
-    "start": "node simple-server.js",
-    "dev": "node simple-server.js",
+    "start": "node api-server.js",
+    "dev": "node api-server.js",
+    "simple": "node simple-server.js",
     "build-data": "node export-special-events.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
