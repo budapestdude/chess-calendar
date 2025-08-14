@@ -734,7 +734,8 @@
             }
         }
 
-        // Multiple endpoints - GitHub Pages first (most reliable), then Railway
+        // Multiple endpoints - GitHub Pages special events first, then fallbacks
+        const GITHUB_SPECIAL_EVENTS_URL = 'https://budapestdude.github.io/chess-calendar/special-events.json';
         const GITHUB_PAGES_URL = 'https://budapestdude.github.io/chess-calendar/events.json';
         const STATIC_JSON_URL = 'https://adventurous-bravery-production.up.railway.app/events.json';
         const API_URL = 'https://adventurous-bravery-production.up.railway.app/api/events?limit=500';
@@ -743,8 +744,8 @@
             // Show loading indicator
             document.getElementById('loading').style.display = 'block';
             
-            // Try GitHub Pages first (most reliable), then Railway options
-            const endpoints = [GITHUB_PAGES_URL, STATIC_JSON_URL, API_URL];
+            // Try special events file first, then full events as fallback
+            const endpoints = [GITHUB_SPECIAL_EVENTS_URL, GITHUB_PAGES_URL, STATIC_JSON_URL, API_URL];
             
             for (const url of endpoints) {
                 try {
@@ -810,14 +811,22 @@
                 console.log("First data row:", data[0]);
             }
             
-            // Filter to show ONLY events where special = "yes"
-            const specialEvents = data.filter(row => {
-                const special = row.special ? row.special.trim().toLowerCase() : "";
-                // Only show events explicitly marked as special
-                return special === "yes";
-            });
+            // Check if data is already filtered (from special-events.json) or needs filtering
+            let specialEvents;
             
-            console.log(`Filtered ${specialEvents.length} special events from ${data.length} total events`);
+            // If we have less than 100 events, assume it's already filtered
+            if (data.length < 100) {
+                console.log(`Using pre-filtered data with ${data.length} special events`);
+                specialEvents = data;
+            } else {
+                // Filter to show ONLY events where special = "yes"
+                specialEvents = data.filter(row => {
+                    const special = row.special ? row.special.trim().toLowerCase() : "";
+                    // Only show events explicitly marked as special
+                    return special === "yes";
+                });
+                console.log(`Filtered ${specialEvents.length} special events from ${data.length} total events`);
+            }
             
             // If no special events found, check the data format
             if (specialEvents.length === 0) {
