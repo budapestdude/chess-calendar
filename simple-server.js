@@ -50,7 +50,7 @@ const server = http.createServer((req, res) => {
           `<li><a href="/${endpoint.split(' - ')[0]}">${endpoint}</a></li>`
         ).join('')}
       </ul>
-      <p><a href="/calendar.html">View Calendar</a></p>
+      <p><a href="/calendar.html">View Calendar</a> | <a href="/manage">Management Dashboard</a></p>
     `;
     res.end(html);
   } else if (req.url === '/health') {
@@ -79,6 +79,43 @@ const server = http.createServer((req, res) => {
         res.end('Calendar page not found');
       } else {
         res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data);
+      }
+    });
+  } else if (req.url === '/manage' || req.url === '/manage.html') {
+    // Serve the database management page
+    const filePath = path.join(__dirname, 'manage.html');
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        res.end('Management page not found');
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(data);
+      }
+    });
+  } else if (req.url === '/app.js') {
+    // Serve the app.js file
+    const filePath = path.join(__dirname, 'app.js');
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        res.end('App.js not found');
+      } else {
+        res.writeHead(200, { 'Content-Type': 'application/javascript' });
+        res.end(data);
+      }
+    });
+  } else if (req.url.endsWith('.css')) {
+    // Serve CSS files
+    const filename = req.url.substring(1);
+    const filePath = path.join(__dirname, filename);
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404);
+        res.end('CSS file not found');
+      } else {
+        res.writeHead(200, { 'Content-Type': 'text/css' });
         res.end(data);
       }
     });

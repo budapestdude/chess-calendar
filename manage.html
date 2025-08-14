@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Calendar Management Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #666;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .categories-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .categories-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+        
+        .category-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .category-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .category-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .actions-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .actions-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Chess Calendar Management Dashboard</h1>
+            <p>View and monitor your chess tournament database</p>
+        </div>
+        
+        <div id="loading" class="loading">Loading statistics...</div>
+        
+        <div id="content" style="display: none;">
+            <div class="stats-grid" id="statsGrid"></div>
+            
+            <div class="categories-section">
+                <h2>📊 Categories Overview</h2>
+                <div class="category-grid" id="categoryGrid"></div>
+            </div>
+            
+            <div class="actions-section">
+                <h2>🚀 Quick Actions</h2>
+                <div class="action-buttons">
+                    <a href="/" class="btn btn-primary">View API Endpoints</a>
+                    <a href="/calendar-flexible.html" class="btn btn-primary">View Calendar</a>
+                    <a href="/wordpress-examples.html" class="btn btn-success">WordPress Integration</a>
+                    <button class="btn btn-primary" onclick="refreshData()">Refresh Data</button>
+                </div>
+                
+                <h3 style="margin-top: 30px; color: #2c3e50;">📝 Update Instructions</h3>
+                <ol style="margin-top: 15px; color: #666; line-height: 1.8;">
+                    <li>Update your local database using your preferred method</li>
+                    <li>Run: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">node export-all-categories.js</code></li>
+                    <li>Commit changes: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">git add . && git commit -m "Update tournaments"</code></li>
+                    <li>Push to GitHub: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">git push</code></li>
+                    <li>Railway will automatically deploy the changes within 1-2 minutes</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="last-updated" id="lastUpdated"></div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        
+        const categories = [
+            { name: 'All Events', file: 'events.json', icon: '🌍' },
+            { name: 'Special/Top Events', file: 'special-events.json', icon: '⭐' },
+            { name: "Women's Events", file: 'womens-events.json', icon: '👩' },
+            { name: 'Youth Events', file: 'youth-events.json', icon: '👦' },
+            { name: 'World Championships', file: 'world-championships.json', icon: '🏆' },
+            { name: 'National Championships', file: 'national-championships.json', icon: '🏅' },
+            { name: 'Online Events', file: 'online-events.json', icon: '💻' },
+            { name: 'Upcoming (30 days)', file: 'upcoming-events.json', icon: '📅' },
+            { name: 'Europe', file: 'europe-events.json', icon: '🇪🇺' },
+            { name: 'Asia', file: 'asia-events.json', icon: '🌏' },
+            { name: 'Americas', file: 'americas-events.json', icon: '🌎' },
+            { name: 'Africa', file: 'africa-events.json', icon: '🌍' },
+            { name: 'Oceania', file: 'oceania-events.json', icon: '🌏' },
+            { name: 'Classical', file: 'classical-events.json', icon: '♟️' },
+            { name: 'Rapid', file: 'rapid-events.json', icon: '⚡' },
+            { name: 'Blitz', file: 'blitz-events.json', icon: '⚡' },
+            { name: 'Bullet', file: 'bullet-events.json', icon: '🚀' },
+            { name: 'Freestyle', file: 'freestyle-events.json', icon: '🎨' }
+        ];
+        
+        async function loadStatistics() {
+            const loadingDiv = document.getElementById('loading');
+            const contentDiv = document.getElementById('content');
+            const statsGrid = document.getElementById('statsGrid');
+            const categoryGrid = document.getElementById('categoryGrid');
+            
+            try {
+                // Load main events file for overall stats
+                const response = await fetch(`${API_BASE}/events.json`);
+                const data = await response.json();
+                const totalEvents = data.total || data.data.length;
+                
+                // Calculate date-based stats
+                const now = new Date();
+                const events = data.data || data;
+                const upcomingCount = events.filter(e => new Date(e.start_datetime) > now).length;
+                const pastCount = events.filter(e => new Date(e.end_datetime) < now).length;
+                const ongoingCount = events.filter(e => {
+                    const start = new Date(e.start_datetime);
+                    const end = new Date(e.end_datetime);
+                    return start <= now && end >= now;
+                }).length;
+                
+                // Display main stats
+                statsGrid.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-number">${totalEvents.toLocaleString()}</div>
+                        <div class="stat-label">Total Events</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${upcomingCount.toLocaleString()}</div>
+                        <div class="stat-label">Upcoming</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${ongoingCount.toLocaleString()}</div>
+                        <div class="stat-label">Ongoing Now</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${pastCount.toLocaleString()}</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${categories.length}</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">${new Date().getFullYear()}</div>
+                        <div class="stat-label">Year</div>
+                    </div>
+                `;
+                
+                // Load all category counts
+                const categoryPromises = categories.map(async (cat) => {
+                    try {
+                        const res = await fetch(`${API_BASE}/${cat.file}`);
+                        const catData = await res.json();
+                        const count = catData.total || catData.data?.length || 0;
+                        return { ...cat, count };
+                    } catch {
+                        return { ...cat, count: 0 };
+                    }
+                });
+                
+                const categoryData = await Promise.all(categoryPromises);
+                
+                // Display categories
+                categoryGrid.innerHTML = categoryData.map(cat => `
+                    <div class="category-item">
+                        <span class="category-name">${cat.icon} ${cat.name}</span>
+                        <span class="category-count">${cat.count}</span>
+                    </div>
+                `).join('');
+                
+                // Update last updated time
+                document.getElementById('lastUpdated').innerHTML = 
+                    `Last updated: ${data.generated ? new Date(data.generated).toLocaleString() : 'Unknown'}`;
+                
+                loadingDiv.style.display = 'none';
+                contentDiv.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                loadingDiv.innerHTML = 'Error loading statistics. Please refresh the page.';
+            }
+        }
+        
+        function refreshData() {
+            location.reload();
+        }
+        
+        // Load statistics on page load
+        document.addEventListener('DOMContentLoaded', loadStatistics);
+    </script>
+</body>
+</html>
