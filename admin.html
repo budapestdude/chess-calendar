@@ -162,6 +162,30 @@
             padding: 10px;
             text-align: left;
             border-bottom: 2px solid #dee2e6;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        
+        .events-table th:hover {
+            background: #e9ecef;
+        }
+        
+        .events-table th.sortable:after {
+            content: '↕';
+            position: absolute;
+            right: 10px;
+            color: #999;
+        }
+        
+        .events-table th.sort-asc:after {
+            content: '↑';
+            color: #007bff;
+        }
+        
+        .events-table th.sort-desc:after {
+            content: '↓';
+            color: #007bff;
         }
         
         .events-table td {
@@ -415,6 +439,9 @@
     <script>
         let authToken = '';
         const API_BASE = window.location.origin;
+        let allEvents = [];
+        let currentSortColumn = null;
+        let currentSortDirection = 'asc';
         
         function authenticate() {
             authToken = document.getElementById('authToken').value;
@@ -452,7 +479,8 @@
             try {
                 const response = await fetch(`${API_BASE}/api/events?limit=500`);
                 const data = await response.json();
-                displayEvents(data.data);
+                allEvents = data.data;
+                displayEvents(allEvents);
             } catch (error) {
                 console.error('Error loading events:', error);
             }
@@ -470,11 +498,11 @@
                 <table class="events-table">
                     <thead>
                         <tr>
-                            <th>Title</th>
-                            <th>Location</th>
-                            <th>Date</th>
-                            <th>Format</th>
-                            <th>Special</th>
+                            <th class="sortable" onclick="sortEvents('title')">Title</th>
+                            <th class="sortable" onclick="sortEvents('location')">Location</th>
+                            <th class="sortable" onclick="sortEvents('start_datetime')">Date</th>
+                            <th class="sortable" onclick="sortEvents('format')">Format</th>
+                            <th class="sortable" onclick="sortEvents('special')">Special</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -660,6 +688,67 @@
         function filterEvents() {
             // Implement filter functionality
             loadEvents(); // For now, just reload
+        }
+        
+        function sortEvents(column) {
+            // Determine sort direction
+            if (currentSortColumn === column) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+            
+            // Sort the events
+            const sortedEvents = [...allEvents].sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+                
+                // Handle null/undefined values
+                if (aVal === null || aVal === undefined || aVal === '') aVal = '';
+                if (bVal === null || bVal === undefined || bVal === '') bVal = '';
+                
+                // Special handling for dates
+                if (column === 'start_datetime' || column === 'end_datetime') {
+                    aVal = new Date(aVal).getTime();
+                    bVal = new Date(bVal).getTime();
+                }
+                
+                // Convert to lowercase for string comparison
+                if (typeof aVal === 'string') aVal = aVal.toLowerCase();
+                if (typeof bVal === 'string') bVal = bVal.toLowerCase();
+                
+                // Compare values
+                if (aVal < bVal) return currentSortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+            
+            // Update display
+            displayEvents(sortedEvents);
+            
+            // Update header styles
+            updateSortHeaders(column);
+        }
+        
+        function updateSortHeaders(column) {
+            // Remove all sort classes
+            document.querySelectorAll('.events-table th').forEach(th => {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Add appropriate sort class to the active column
+            const headers = document.querySelectorAll('.events-table th');
+            headers.forEach(th => {
+                if (th.textContent === column || 
+                    (column === 'title' && th.textContent === 'Title') ||
+                    (column === 'location' && th.textContent === 'Location') ||
+                    (column === 'start_datetime' && th.textContent === 'Date') ||
+                    (column === 'format' && th.textContent === 'Format') ||
+                    (column === 'special' && th.textContent === 'Special')) {
+                    th.classList.add(currentSortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            });
         }
         
         // Check if already authenticated (for development)
