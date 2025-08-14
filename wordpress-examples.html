@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WordPress Calendar Examples</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .example { background: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        pre { background: #333; color: #0f0; padding: 15px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>WordPress Calendar Integration Examples</h1>
+    <p>Copy and paste these code snippets into your WordPress pages (in HTML/Code block mode)</p>
+
+    <div class="example">
+        <h2>1. Top/Special Events Page</h2>
+        <pre><code>&lt;script&gt;
+const CALENDAR_CONFIG = {
+    dataSource: 'special-events',
+    title: 'Top Chess Tournaments 2025',
+    subtitle: 'The most prestigious chess events of the year',
+    apiBase: 'https://chess-calendar-production.up.railway.app'
+};
+&lt;/script&gt;
+&lt;iframe src="https://chess-calendar-production.up.railway.app/calendar-flexible.html" 
+        width="100%" height="800" frameborder="0"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>2. Women's Chess Events</h2>
+        <pre><code>&lt;script&gt;
+const CALENDAR_CONFIG = {
+    dataSource: 'womens-events',
+    title: "Women's Chess Championships 2025",
+    subtitle: 'All women\'s chess tournaments and championships',
+    apiBase: 'https://chess-calendar-production.up.railway.app'
+};
+&lt;/script&gt;
+&lt;iframe src="https://chess-calendar-production.up.railway.app/calendar-flexible.html" 
+        width="100%" height="800" frameborder="0"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>3. European Chess Events</h2>
+        <pre><code>&lt;script&gt;
+const CALENDAR_CONFIG = {
+    dataSource: 'europe-events',
+    title: 'European Chess Calendar 2025',
+    subtitle: 'All chess tournaments in Europe',
+    apiBase: 'https://chess-calendar-production.up.railway.app'
+};
+&lt;/script&gt;
+&lt;iframe src="https://chess-calendar-production.up.railway.app/calendar-flexible.html" 
+        width="100%" height="800" frameborder="0"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>4. Youth/Junior Events</h2>
+        <pre><code>&lt;script&gt;
+const CALENDAR_CONFIG = {
+    dataSource: 'youth-events',
+    title: 'Youth Chess Championships 2025',
+    subtitle: 'Junior and youth chess tournaments worldwide',
+    apiBase: 'https://chess-calendar-production.up.railway.app'
+};
+&lt;/script&gt;
+&lt;iframe src="https://chess-calendar-production.up.railway.app/calendar-flexible.html" 
+        width="100%" height="800" frameborder="0"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>5. Rapid Chess Events</h2>
+        <pre><code>&lt;script&gt;
+const CALENDAR_CONFIG = {
+    dataSource: 'rapid-events',
+    title: 'Rapid Chess Tournaments 2025',
+    subtitle: 'All rapid format chess events',
+    apiBase: 'https://chess-calendar-production.up.railway.app'
+};
+&lt;/script&gt;
+&lt;iframe src="https://chess-calendar-production.up.railway.app/calendar-flexible.html" 
+        width="100%" height="800" frameborder="0"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>6. Upcoming Events (Next 30 Days)</h2>
+        <pre><code>&lt;script&gt;
+const CALENDAR_CONFIG = {
+    dataSource: 'upcoming-events',
+    title: 'Upcoming Chess Tournaments',
+    subtitle: 'Chess events in the next 30 days',
+    apiBase: 'https://chess-calendar-production.up.railway.app'
+};
+&lt;/script&gt;
+&lt;iframe src="https://chess-calendar-production.up.railway.app/calendar-flexible.html" 
+        width="100%" height="800" frameborder="0"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+
+    <div class="example">
+        <h2>7. All Events</h2>
+        <pre><code>&lt;script&gt;
+const CALENDAR_CONFIG = {
+    dataSource: 'events',
+    title: 'Complete Chess Calendar 2025',
+    subtitle: 'All chess tournaments worldwide',
+    apiBase: 'https://chess-calendar-production.up.railway.app'
+};
+&lt;/script&gt;
+&lt;iframe src="https://chess-calendar-production.up.railway.app/calendar-flexible.html" 
+        width="100%" height="800" frameborder="0"&gt;&lt;/iframe&gt;</code></pre>
+    </div>
+
+    <h2>Available Data Sources:</h2>
+    <ul>
+        <li><code>events</code> - All tournaments (1459)</li>
+        <li><code>special-events</code> - Top/Special tournaments (63)</li>
+        <li><code>womens-events</code> - Women's tournaments (84)</li>
+        <li><code>youth-events</code> - Youth/Junior tournaments (134)</li>
+        <li><code>world-championships</code> - World Championships (7)</li>
+        <li><code>online-events</code> - Online tournaments (5)</li>
+        <li><code>national-championships</code> - National Championships (20)</li>
+        <li><code>upcoming-events</code> - Next 30 days (139)</li>
+        <li><code>europe-events</code> - Europe (930)</li>
+        <li><code>asia-events</code> - Asia (215)</li>
+        <li><code>africa-events</code> - Africa (31)</li>
+        <li><code>oceania-events</code> - Oceania (70)</li>
+        <li><code>classical-events</code> - Classical format (976)</li>
+        <li><code>rapid-events</code> - Rapid format (281)</li>
+        <li><code>blitz-events</code> - Blitz format (100)</li>
+        <li><code>bullet-events</code> - Bullet format (1)</li>
+        <li><code>freestyle-events</code> - Freestyle format (11)</li>
+    </ul>
+</body>
+</html>

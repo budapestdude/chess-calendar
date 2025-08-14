@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Tournament Calendar</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .calendar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .calendar-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        
+        .month-divider {
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            margin: 20px 0 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .event-card {
+            border: 1px solid #ddd;
+            border-left: 4px solid #d4af37;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .event-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .event-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        
+        .event-details {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .event-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: #2c3e50;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #2c3e50;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .event-link:hover {
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .stats {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h1 id="calendar-title">Chess Tournament Calendar</h1>
+            <p id="calendar-subtitle"></p>
+        </div>
+        
+        <div id="stats" class="stats"></div>
+        <div id="loading" class="loading">Loading tournaments...</div>
+        <div id="error" class="error-message" style="display:none;"></div>
+        <div id="events-container"></div>
+    </div>
+
+    <script>
+        // Configuration - This can be customized per WordPress page
+        const CONFIG = {
+            // Change this to load different categories:
+            // Options: 'special-events', 'womens-events', 'europe-events', 'asia-events', 
+            //          'africa-events', 'oceania-events', 'youth-events', 'world-championships',
+            //          'online-events', 'upcoming-events', 'national-championships',
+            //          'classical-events', 'rapid-events', 'blitz-events', 'events' (all)
+            dataSource: 'special-events',
+            
+            // Custom title and subtitle for the page
+            title: 'Top Chess Tournaments 2025',
+            subtitle: 'The most prestigious chess events of the year',
+            
+            // Base URL for the API
+            apiBase: 'https://chess-calendar-production.up.railway.app'
+        };
+
+        // You can override CONFIG from WordPress by defining it before this script
+        if (typeof CALENDAR_CONFIG !== 'undefined') {
+            Object.assign(CONFIG, CALENDAR_CONFIG);
+        }
+
+        async function loadTournaments() {
+            const loadingDiv = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            const container = document.getElementById('events-container');
+            const statsDiv = document.getElementById('stats');
+            
+            // Update title and subtitle
+            document.getElementById('calendar-title').textContent = CONFIG.title;
+            document.getElementById('calendar-subtitle').textContent = CONFIG.subtitle;
+            
+            try {
+                const url = `${CONFIG.apiBase}/${CONFIG.dataSource}.json`;
+                console.log(`Loading from: ${url}`);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const events = data.data || data;
+                
+                loadingDiv.style.display = 'none';
+                
+                if (events.length === 0) {
+                    container.innerHTML = '<p>No tournaments found for this category.</p>';
+                    return;
+                }
+                
+                // Display stats
+                statsDiv.innerHTML = `Total: ${events.length} tournaments`;
+                
+                // Group events by month
+                const eventsByMonth = {};
+                events.forEach(event => {
+                    const date = new Date(event.start_datetime);
+                    const monthYear = date.toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        year: 'numeric' 
+                    });
+                    
+                    if (!eventsByMonth[monthYear]) {
+                        eventsByMonth[monthYear] = [];
+                    }
+                    eventsByMonth[monthYear].push(event);
+                });
+                
+                // Display events
+                let html = '';
+                Object.keys(eventsByMonth).forEach(month => {
+                    html += `<div class="month-divider">${month}</div>`;
+                    
+                    eventsByMonth[month].forEach(event => {
+                        const startDate = new Date(event.start_datetime).toLocaleDateString();
+                        const endDate = new Date(event.end_datetime).toLocaleDateString();
+                        
+                        html += `
+                            <div class="event-card">
+                                <div class="event-title">${event.title || 'Untitled Event'}</div>
+                                <div class="event-details">
+                                    ${event.location ? `📍 ${event.location}<br>` : ''}
+                                    📅 ${startDate} - ${endDate}<br>
+                                    ${event.format ? `🎯 Format: ${event.format}<br>` : ''}
+                                    ${event.continent ? `🌍 ${event.continent}<br>` : ''}
+                                    ${event.players ? `👥 ${event.players.substring(0, 100)}...<br>` : ''}
+                                    ${event.url ? `<a href="${event.url}" target="_blank" class="event-link">View Details →</a>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                });
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading tournaments:', error);
+                loadingDiv.style.display = 'none';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = `Error loading tournaments: ${error.message}`;
+            }
+        }
+
+        // Load tournaments when page loads
+        document.addEventListener('DOMContentLoaded', loadTournaments);
+    </script>
+</body>
+</html>

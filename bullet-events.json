@@ -1,0 +1,37 @@
+{
+  "data": [
+    {
+      "id": 682,
+      "title": "Chess.com Bullet Chess Championship",
+      "description": "",
+      "location": "Online",
+      "start_datetime": "2025-06-23 00:00:00",
+      "end_datetime": "2025-06-28 00:00:00",
+      "all_day": 0,
+      "event_type": "KO",
+      "format": "Bullet",
+      "rounds": null,
+      "url": "https://www.chess.com/news/view/announcing-bullet-chess-championship-2025",
+      "special": "",
+      "continent": "Online",
+      "category": "",
+      "live_games": "",
+      "prize_fund": "",
+      "venue": "",
+      "landing": "",
+      "players": "Alireza Firouzja, Arjun Erigaisi, Jan-Krzysztof Duda, Nihal Sarin, Sam Sevian, Yagiz Kaan Erdogmus, Daniel Naroditsky",
+      "tags": null,
+      "color": null,
+      "priority": 0,
+      "status": "confirmed",
+      "visibility": "public",
+      "created_at": "2025-08-13 09:40:03",
+      "updated_at": "2025-08-13 09:40:03",
+      "metadata": "{}",
+      "deleted_at": null
+    }
+  ],
+  "total": 1,
+  "description": "Bullet format tournaments",
+  "generated": "2025-08-14T05:41:53.035Z"
+}
