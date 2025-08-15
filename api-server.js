@@ -25,8 +25,18 @@ app.use(express.static(__dirname));
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'your-secret-admin-token-2025';
 
 function checkAuth(req, res, next) {
-  const token = req.headers.authorization?.replace('Bearer ', '');
-  if (token !== ADMIN_TOKEN) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.replace('Bearer ', '')?.trim();
+  
+  // Debug logging
+  console.log('Auth check:', {
+    authHeader: authHeader ? authHeader.substring(0, 20) + '...' : 'NO HEADER',
+    extractedToken: token ? token.substring(0, 10) + '...' : 'NO TOKEN',
+    expectedToken: ADMIN_TOKEN.substring(0, 10) + '...',
+    match: token === ADMIN_TOKEN
+  });
+  
+  if (!token || token !== ADMIN_TOKEN) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   next();

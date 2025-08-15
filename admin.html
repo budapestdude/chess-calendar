@@ -280,17 +280,15 @@
             <p>Manage chess tournament database</p>
         </div>
         
-        <div class="auth-section" id="authSection">
+        <!-- Authentication handled via login.html -->
+        <div class="auth-section hidden" id="authSection">
             <strong>Authentication Required:</strong>
-            <input type="password" id="authToken" placeholder="Enter admin token (default: your-secret-admin-token-2025)" onkeypress="if(event.key==='Enter') authenticate()">
+            <input type="password" id="authToken" placeholder="Enter admin token" onkeypress="if(event.key==='Enter') authenticate()">
             <button class="btn btn-primary" onclick="authenticate()">Authenticate</button>
             <span id="authStatus"></span>
-            <div style="margin-top: 10px; font-size: 12px; color: #856404;">
-                ⚠️ Default token: <code>your-secret-admin-token-2025</code> (Set ADMIN_TOKEN env var in production)
-            </div>
         </div>
         
-        <div id="adminContent" class="hidden">
+        <div id="adminContent">
             <div style="background: #d4edda; color: #155724; padding: 10px; margin-bottom: 15px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
                 <span>✓ Authenticated successfully</span>
                 <button class="btn btn-sm" style="background: #6c757d; color: white;" onclick="logout()">Logout</button>
@@ -448,19 +446,55 @@
     </div>
     
     <script>
-        let authToken = '';
+        // Check for authentication on page load
+        (function checkAuth() {
+            const sessionToken = sessionStorage.getItem('adminAuthToken');
+            const localToken = localStorage.getItem('adminAuthToken');
+            const tokenExpiry = localStorage.getItem('adminAuthTokenExpiry');
+            
+            let hasValidToken = false;
+            
+            if (sessionToken) {
+                hasValidToken = true;
+            } else if (localToken && tokenExpiry) {
+                const now = new Date().getTime();
+                if (now < parseInt(tokenExpiry)) {
+                    // Token still valid, copy to session
+                    sessionStorage.setItem('adminAuthToken', localToken);
+                    hasValidToken = true;
+                } else {
+                    // Token expired, clear it
+                    localStorage.removeItem('adminAuthToken');
+                    localStorage.removeItem('adminAuthTokenExpiry');
+                    localStorage.removeItem('adminUsername');
+                }
+            }
+            
+            if (!hasValidToken) {
+                // No valid authentication, redirect to login
+                window.location.href = '/login.html';
+                return;
+            }
+        })();
+        
+        let authToken = sessionStorage.getItem('adminAuthToken') || '';
         const API_BASE = window.location.origin;
         let allEvents = [];
         let currentSortColumn = null;
         let currentSortDirection = 'asc';
         
         function authenticate() {
-            authToken = document.getElementById('authToken').value;
+            const tokenInput = document.getElementById('authToken').value;
             
-            if (!authToken) {
+            if (!tokenInput) {
                 document.getElementById('authStatus').innerHTML = '<span style="color: red;">✗ Please enter a token</span>';
                 return;
             }
+            
+            // Store token in memory and sessionStorage
+            authToken = tokenInput;
+            sessionStorage.setItem('adminAuthToken', authToken);
+            console.log('Authenticating with token:', authToken.substring(0, 10) + '...');
             
             // Test authentication
             fetch(`${API_BASE}/api/events`, {
@@ -473,17 +507,22 @@
                     document.getElementById('authSection').classList.add('hidden');
                     document.getElementById('adminContent').classList.remove('hidden');
                     document.getElementById('authStatus').innerHTML = '<span style="color: green;">✓ Authenticated</span>';
+                    console.log('Authentication successful');
                     loadEvents();
                 } else {
                     document.getElementById('authStatus').innerHTML = '<span style="color: red;">✗ Invalid token. Please try again.</span>';
                     document.getElementById('adminContent').classList.add('hidden');
                     authToken = '';
+                    sessionStorage.removeItem('adminAuthToken');
+                    console.log('Authentication failed with status:', response.status);
                 }
             })
             .catch(error => {
                 document.getElementById('authStatus').innerHTML = '<span style="color: red;">✗ Authentication failed: ' + error.message + '</span>';
                 document.getElementById('adminContent').classList.add('hidden');
                 authToken = '';
+                sessionStorage.removeItem('adminAuthToken');
+                console.error('Authentication error:', error);
             });
         }
         
@@ -573,12 +612,21 @@
                 eventData.end_datetime = eventData.end_datetime.replace('T', ' ') + ':00';
             }
             
+            // Always use the latest token from sessionStorage
+            const currentToken = sessionStorage.getItem('adminAuthToken') || authToken;
+            if (!currentToken) {
+                alert('No authentication token found. Please authenticate again.');
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('adminContent').classList.add('hidden');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/api/events`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
+                        'Authorization': `Bearer ${currentToken}`
                     },
                     body: JSON.stringify(eventData)
                 });
@@ -665,12 +713,23 @@
             const formData = new FormData(e.target);
             const eventData = Object.fromEntries(formData);
             
+            // Always use the latest token from sessionStorage
+            const currentToken = sessionStorage.getItem('adminAuthToken') || authToken;
+            if (!currentToken) {
+                alert('No authentication token found. Please authenticate again.');
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('adminContent').classList.add('hidden');
+                return;
+            }
+            
+            console.log('Updating event with token:', currentToken ? currentToken.substring(0, 10) + '...' : 'NO TOKEN');
+            
             try {
                 const response = await fetch(`${API_BASE}/api/events/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
+                        'Authorization': `Bearer ${currentToken}`
                     },
                     body: JSON.stringify(eventData)
                 });
@@ -682,10 +741,9 @@
                 } else {
                     const error = await response.json();
                     if (response.status === 401) {
-                        alert('Authentication error! Your session may have expired. Please refresh the page and authenticate again.');
-                        document.getElementById('authSection').classList.remove('hidden');
-                        document.getElementById('adminContent').classList.add('hidden');
-                        authToken = '';
+                        console.error('Update auth failed - token being used:', authToken ? authToken.substring(0, 10) + '...' : 'NO TOKEN');
+                        alert('Authentication error! The token might be incorrect. Please check your token:\n\nDefault: your-secret-admin-token-2025\n\nIf using a custom token, make sure it matches the ADMIN_TOKEN environment variable.');
+                        // Don't automatically clear the session
                     } else {
                         alert('Error: ' + error.error);
                     }
@@ -702,11 +760,20 @@
                 return;
             }
             
+            // Always use the latest token from sessionStorage
+            const currentToken = sessionStorage.getItem('adminAuthToken') || authToken;
+            if (!currentToken) {
+                alert('No authentication token found. Please authenticate again.');
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('adminContent').classList.add('hidden');
+                return;
+            }
+            
             try {
                 const response = await fetch(`${API_BASE}/api/events/${id}`, {
                     method: 'DELETE',
                     headers: {
-                        'Authorization': `Bearer ${authToken}`
+                        'Authorization': `Bearer ${currentToken}`
                     }
                 });
                 
@@ -720,6 +787,7 @@
                         document.getElementById('authSection').classList.remove('hidden');
                         document.getElementById('adminContent').classList.add('hidden');
                         authToken = '';
+                        sessionStorage.removeItem('adminAuthToken');
                     } else {
                         alert('Error: ' + error.error);
                     }
@@ -810,15 +878,10 @@
             });
         }
         
-        // Session check - ensure admin content is hidden on load
+        // Page initialization
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('adminContent').classList.add('hidden');
-            document.getElementById('authSection').classList.remove('hidden');
-            
-            // Auto-fill for localhost development only
-            if (window.location.hostname === 'localhost') {
-                document.getElementById('authToken').value = 'your-secret-admin-token-2025';
-            }
+            // Load events on page load since user is already authenticated
+            loadEvents();
         });
         
         // Prevent right-click inspect element bypass
@@ -835,12 +898,13 @@
         // Logout function
         function logout() {
             authToken = '';
-            document.getElementById('adminContent').classList.add('hidden');
-            document.getElementById('authSection').classList.remove('hidden');
-            document.getElementById('authToken').value = '';
-            document.getElementById('authStatus').innerHTML = '';
+            sessionStorage.removeItem('adminAuthToken');
+            localStorage.removeItem('adminAuthToken');
+            localStorage.removeItem('adminAuthTokenExpiry');
             alert('Logged out successfully');
+            window.location.href = '/login.html';
         }
+        
     </script>
 </body>
 </html>

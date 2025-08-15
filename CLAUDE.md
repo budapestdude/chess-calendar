@@ -4,112 +4,136 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Chess Calendar Database system that provides both SQLite and PostgreSQL implementations for storing and accessing chess tournament data. The project includes a REST API, web interface, and import/export capabilities for managing 1400+ chess tournaments.
+A Chess Calendar Database system with 1400+ tournaments. The project uses SQLite as primary storage with Express.js REST API, providing web interface and calendar subscription capabilities. Alternative PostgreSQL implementation available for scalable deployments.
 
 ## Architecture
 
-### Database Layer
-- **Primary**: SQLite database (`calendar.db`) for the main deployment using `better-sqlite3`
-- **Alternative**: PostgreSQL support via Docker Compose for scalable deployments
-- Chess tournament specific schema with fields for format, rounds, continent, players, etc.
-- Soft delete support and full-text search capabilities
+### Active Implementation
+- **Database**: SQLite (`calendar.db`) via `better-sqlite3` - contains 1457+ tournaments
+- **Main API**: `calendar-api.js` - Express server on port 3000
+- **Alternative API**: `api-server.js` - Express server with admin authentication
+- **Web Interface**: `index.html` + `app.js` - tournament viewing, search, CSV upload
+- **Admin Panel**: `admin.html` - authenticated management interface
 
-### API Layer
-- **Main API**: `calendar-api.js` - Express server with SQLite backend (port 3000)
-- **PostgreSQL API**: `api/server.js` - Express server with PostgreSQL backend
-- RESTful endpoints for CRUD operations, search, filtering, and statistics
-- ICS/iCal export endpoint for calendar subscriptions
-- CORS enabled for cross-origin access
-
-### Frontend
-- `index.html` + `app.js`: Web interface for viewing and managing tournaments
-- Features: search, filtering by continent/format, CSV upload, single event creation
-- Direct API integration via fetch
+### Key Features
+- Full-text search across all tournament fields
+- ICS/iCal calendar subscription endpoint
+- Continent and format-based filtering
+- Player name search
+- Soft delete support (`deleted_at` timestamps)
+- CSV import/export capabilities
 
 ## Commands
 
-### Development
 ```bash
-# Start the SQLite API server
+# Start main SQLite server
 node calendar-api.js
 # or
 npm start
 
-# Start PostgreSQL stack (if using Docker)
-docker-compose up -d
+# Alternative server with admin auth
+node api-server.js
+
+# Simple static server
+npm run simple
 
 # Import CSV data
-node import-chess-calendar.js "Chess Calendar - Sheet1 (1).csv"
+node import-chess-calendar.js "filename.csv"
 
-# Query database from CLI
+# Query database CLI
 node query-calendar.js
-```
 
-### API Development (PostgreSQL version)
-```bash
-cd api
-npm install
-npm start  # Start server
-npm run dev  # Start with nodemon
-npm run import  # Import from Google Sheets
-```
+# Export special events
+npm run build-data
 
-### Deployment
-```bash
-# Deploy to Railway (see DEPLOY-TO-RAILWAY.md)
-git add .
-git commit -m "Update calendar"
-git push
-
-# The app auto-deploys to Railway on push
+# PostgreSQL stack (Docker)
+docker-compose up -d
 ```
 
 ## Key API Endpoints
 
-- `GET /api/events` - List events with pagination and filters
-- `GET /api/events/upcoming` - Get upcoming tournaments
+### Public Endpoints (no auth required)
+- `GET /api/events` - List events with filters
+- `GET /api/events/upcoming` - Upcoming tournaments
 - `GET /api/events/continent/:continent` - Filter by continent
-- `GET /api/players/search?name=` - Search by player name
-- `GET /api/stats` - Get database statistics
+- `GET /api/events/format/:format` - Filter by format (rapid/blitz/classical)
+- `GET /api/players/search?name=` - Search by player
+- `GET /api/stats` - Database statistics
 - `GET /api/events.ics` - Calendar subscription feed
-- `POST /api/events` - Create new event
+- `GET /health` - Health check
+
+### Admin Endpoints (requires Bearer token)
+- `POST /api/events` - Create event
 - `PUT /api/events/:id` - Update event
 - `DELETE /api/events/:id` - Soft delete event
 
-## Database Schema Key Fields
+## Database Schema
 
-### Chess Tournament Specific
-- `event_type`, `format`, `rounds` - Tournament classification
-- `continent`, `location`, `venue` - Geographic data
+### Chess-Specific Fields
+- `format` - Tournament format (rapid/blitz/classical/bullet/freestyle)
+- `rounds` - Number of rounds
+- `continent` - Geographic region (Europe/Americas/Asia/Africa/Oceania)
 - `players` - Participant names (searchable)
-- `prize_fund`, `special` - Tournament details
-- `url`, `landing`, `live_games` - External links
+- `prize_fund` - Prize pool information
+- `special` - Special tournament flag (yes/no)
+- `event_type` - Tournament classification
 
-### Standard Calendar Fields
-- `title`, `description`, `start_datetime`, `end_datetime`
-- `created_at`, `updated_at`, `deleted_at` (soft delete)
+### External Links
+- `url` - Tournament website
+- `landing` - Registration page
+- `live_games` - Live broadcast link
 
-## Environment Variables
+## Deployment
 
-For PostgreSQL deployment:
-- `DATABASE_URL` - PostgreSQL connection string
-- `JWT_SECRET` - For authentication (if enabled)
-- `NODE_ENV` - Set to 'production' for deployment
+### Railway Deployment
+```bash
+git add .
+git commit -m "Update calendar"
+git push
+# Auto-deploys to Railway
+```
+
+### Environment Variables
 - `PORT` - Server port (default: 3000)
+- `NODE_ENV` - Set to 'production' for deployment
+- `ADMIN_TOKEN` - Bearer token for admin operations (api-server.js)
+- `DATABASE_URL` - PostgreSQL connection (if using PostgreSQL)
 
-## Testing & Validation
+## Testing
 
-Currently no automated tests. Manual testing approach:
-1. Start server: `node calendar-api.js`
-2. Check health: `curl http://localhost:3000/health`
-3. Test API: `curl http://localhost:3000/api/stats`
-4. Web interface: Open http://localhost:3000
+Manual testing workflow:
+```bash
+# 1. Start server
+node calendar-api.js
 
-## Important Notes
+# 2. Health check
+curl http://localhost:3000/health
 
-- The SQLite implementation (`calendar-api.js`) is the primary/active version
-- Database file `calendar.db` contains 1457+ chess tournaments
-- No authentication by default - add JWT middleware for production
-- Soft deletes are used (records marked with `deleted_at` timestamp)
-- CSV import expects specific column mapping (see import-chess-calendar.js)
-- Railway deployment uses SQLite with persistent storage
+# 3. Test API
+curl http://localhost:3000/api/stats
+
+# 4. Web interface
+open http://localhost:3000
+
+# 5. Admin panel (api-server.js only)
+open http://localhost:3000/admin
+```
+
+## CSV Import Format
+
+Expected columns for `import-chess-calendar.js`:
+- Title, Start Date, End Date
+- Location, Continent, Venue
+- Format, Rounds, Event Type
+- Players, Prize Fund, Special
+- URL, Landing, Live Games
+
+## Important Implementation Notes
+
+- **Primary server**: `calendar-api.js` (no auth, public API)
+- **Admin server**: `api-server.js` (Bearer auth required)
+- **Database path**: Production uses `/app/calendar.db`, development uses `./calendar.db`
+- **CORS**: Enabled for all origins in both implementations
+- **Soft deletes**: Records marked with `deleted_at`, not physically removed
+- **No automated tests**: Rely on manual testing workflow
+- **Railway deployment**: Uses SQLite with persistent storage volume
