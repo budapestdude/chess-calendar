@@ -150,7 +150,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
-app.use(express.static(__dirname));
+
+// Serve static files EXCEPT index.html (we'll handle that with routing)
+app.use(express.static(__dirname, {
+  index: false // Don't automatically serve index.html
+}));
 
 // Simple authentication (you should use proper auth in production)
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'your-secret-admin-token-2025';
@@ -424,8 +428,20 @@ app.get('/:filename.json', (req, res) => {
 });
 
 // Serve HTML pages
+
+// Make admin the homepage - redirect root to login
+app.get('/', (req, res) => {
+  res.redirect('/login.html');
+});
+
+// Serve admin page (now accessible via /admin or after login)
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+// Legacy route for old index page (if needed)
+app.get('/old-index', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index-old.html'));
 });
 
 app.get('/manage', (req, res) => {
