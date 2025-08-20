@@ -61,6 +61,36 @@
       "deleted_at": null
     },
     {
+      "id": 2082,
+      "title": "17th IBCA Chess Olympiad",
+      "description": "",
+      "location": "Vrnjacka Banja - Serbia",
+      "start_datetime": "2025-06-17 00:00:00",
+      "end_datetime": "2025-06-05 00:00:00",
+      "all_day": 0,
+      "event_type": "Blind",
+      "format": "Classical",
+      "rounds": null,
+      "url": "https://chess-results.com/tnr1170160.aspx?lan=1",
+      "special": "",
+      "continent": "Europe",
+      "category": "",
+      "live_games": "",
+      "prize_fund": "",
+      "venue": "",
+      "landing": "",
+      "players": "",
+      "tags": null,
+      "color": null,
+      "priority": 0,
+      "status": "confirmed",
+      "visibility": "public",
+      "created_at": "2025-08-20 09:57:11",
+      "updated_at": "2025-08-20 09:57:11",
+      "metadata": "{}",
+      "deleted_at": null
+    },
+    {
       "id": 671,
       "title": "FIDE World Cup U8 U10 U12",
       "description": "",
@@ -211,7 +241,7 @@
       "deleted_at": null
     }
   ],
-  "total": 7,
+  "total": 8,
   "description": "World Championships & Olympiads",
-  "generated": "2025-08-14T05:41:53.039Z"
+  "generated": "2025-08-20T10:14:40.840Z"
 }

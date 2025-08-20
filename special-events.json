@@ -511,36 +511,6 @@
       "deleted_at": null
     },
     {
-      "id": 125,
-      "title": "Grenke Chess Open",
-      "description": "",
-      "location": "Karlsruhe - Germany",
-      "start_datetime": "2025-04-17 00:00:00",
-      "end_datetime": "2025-04-21 00:00:00",
-      "all_day": 0,
-      "event_type": "Open",
-      "format": "Classical freestyle",
-      "rounds": 9,
-      "url": "https://calendar.chessdom.com/grenke-chess-open-freestyle/",
-      "special": "yes",
-      "continent": "Europe",
-      "category": "",
-      "live_games": "",
-      "prize_fund": "",
-      "venue": "",
-      "landing": "",
-      "players": "Magnus Carlsen, Erigaisi Arjun, Fabiano Caruana, Ian Nepomniachtchi,Chithambaram VR. Aravindh, Shakhriyar Mamedyarov, Wesley So, Levon Aronian, Leinier Dominguez Perez, Hans Moke Niemann, Quang Liem Le, Richard Rapport, Maxime Vachier-Lagrave, Vincent Keymer, Yu Yangyi, Pentala Harikrishna, Javokhir Sindarov, Andrey Esipenko, Dmitriy Andreikin, Ray Robson, Parham Maghsoodloo, Alexander Grischuk, Jorden van Foreest, Alexey Sarana, Nikita Vitiugov, Rasmus Svane, David Navara",
-      "tags": null,
-      "color": null,
-      "priority": 0,
-      "status": "confirmed",
-      "visibility": "public",
-      "created_at": "2025-08-13 09:40:03",
-      "updated_at": "2025-08-13 09:40:03",
-      "metadata": "{}",
-      "deleted_at": null
-    },
-    {
       "id": 155,
       "title": "Superbet Rapid GCT",
       "description": "",
@@ -1891,7 +1861,7 @@
       "deleted_at": null
     }
   ],
-  "total": 63,
+  "total": 62,
   "description": "Top/Special tournaments only",
-  "generated": "2025-08-14T05:41:53.013Z"
+  "generated": "2025-08-20T10:14:40.806Z"
 }
