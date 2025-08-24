@@ -325,7 +325,7 @@
                         <option value="Bullet">Bullet</option>
                     </select>
                     <button class="btn btn-primary" onclick="loadEvents()">Refresh</button>
-                    <button class="btn btn-success" onclick="downloadCSV()">📊 Export CSV</button>
+                    <button class="btn btn-success" onclick="downloadCSV(event)">📊 Export CSV</button>
                 </div>
                 
                 <div id="eventsTableContainer"></div>
@@ -347,8 +347,8 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Start Date *</label>
-                            <input type="datetime-local" name="start_datetime" required>
+                            <label>Start Date</label>
+                            <input type="datetime-local" name="start_datetime">
                         </div>
                         <div class="form-group">
                             <label>End Date</label>
@@ -1526,14 +1526,14 @@
         }
         
         // CSV Export function
-        async function downloadCSV() {
+        async function downloadCSV(event) {
             if (!checkAuth()) return;
             
             try {
                 const currentToken = sessionStorage.getItem('adminAuthToken') || authToken;
                 
                 // Show loading message
-                const originalButton = event.target;
+                const originalButton = event ? event.target : document.querySelector('button[onclick*="downloadCSV"]');
                 const originalText = originalButton.innerHTML;
                 originalButton.innerHTML = '⏳ Exporting...';
                 originalButton.disabled = true;
@@ -1586,9 +1586,11 @@
                 alert(`Error exporting CSV: ${error.message}`);
                 
                 // Reset button
-                const button = event.target;
-                button.innerHTML = '📊 Export CSV';
-                button.disabled = false;
+                const button = event ? event.target : document.querySelector('button[onclick*="downloadCSV"]');
+                if (button) {
+                    button.innerHTML = '📊 Export CSV';
+                    button.disabled = false;
+                }
             }
         }
         

@@ -255,11 +255,15 @@ app.post('/api/events', checkAuth, (req, res) => {
       description, venue, landing, players
     } = req.body;
     
-    if (!title || !start_datetime || !url) {
+    if (!title || !url) {
       return res.status(400).json({ 
-        error: 'Missing required fields: title, start_datetime, url' 
+        error: 'Missing required fields: title, url' 
       });
     }
+    
+    // Use current date if start_datetime not provided
+    const eventStartTime = start_datetime || new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const eventEndTime = end_datetime || eventStartTime;
     
     const stmt = db.prepare(`
       INSERT INTO calendar_events (
@@ -272,8 +276,8 @@ app.post('/api/events', checkAuth, (req, res) => {
     `);
     
     const info = stmt.run(
-      title, location || '', start_datetime,
-      end_datetime || start_datetime, event_type || '',
+      title, location || '', eventStartTime,
+      eventEndTime, event_type || '',
       format || '', rounds || null, url, special || '',
       continent || '', category || '', live_games || '',
       prize_fund || '', description || '', venue || '',
