@@ -294,11 +294,11 @@
                 <button class="btn btn-sm" style="background: #6c757d; color: white;" onclick="logout()">Logout</button>
             </div>
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('view')">View Events</button>
-                <button class="tab" onclick="switchTab('add')">Add Event</button>
-                <button class="tab" onclick="switchTab('import')">Bulk Import</button>
-                <button class="tab" onclick="switchTab('duplicates')">Duplicates</button>
-                <button class="tab" onclick="switchTab('backups')">Backups</button>
+                <button class="tab active" onclick="switchTab('view', event)">View Events</button>
+                <button class="tab" onclick="switchTab('add', event)">Add Event</button>
+                <button class="tab" onclick="switchTab('import', event)">Bulk Import</button>
+                <button class="tab" onclick="switchTab('duplicates', event)">Duplicates</button>
+                <button class="tab" onclick="switchTab('backups', event)">Backups</button>
             </div>
             
             <!-- View Events Tab -->
@@ -569,10 +569,19 @@
             });
         }
         
-        function switchTab(tab) {
+        function switchTab(tab, clickEvent) {
             // Update tab buttons
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            if (clickEvent && clickEvent.target) {
+                clickEvent.target.classList.add('active');
+            } else {
+                // Find the tab button by its onclick content
+                document.querySelectorAll('.tab').forEach(t => {
+                    if (t.onclick && t.onclick.toString().includes(`'${tab}'`)) {
+                        t.classList.add('active');
+                    }
+                });
+            }
             
             // Show/hide content
             document.getElementById('viewTab').classList.toggle('hidden', tab !== 'view');
@@ -679,7 +688,7 @@
                 if (response.ok) {
                     alert('Event added successfully!');
                     e.target.reset();
-                    switchTab('view');
+                    switchTab('view', null);
                     loadEvents();
                 } else {
                     const error = await response.json();
