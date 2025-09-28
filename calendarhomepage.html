@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Chess Calendar</title>
+    <style>
+        /* Main Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            transition: background-color 0.5s ease;
+        }
+        
+        .chess-calendar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            transition: opacity 0.5s ease;
+        }
+        
+        /* Enhanced Header Styles */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            border-bottom: none;
+            position: relative;
+            transform: translateY(0);
+            transition: transform 0.5s ease;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMjUgMjVMNTAgNTBMMjUgNzVMNTAgMTAwTDc1IDc1TDUwIDUwTDc1IDI1TDUwIDBMMjUgMjVaIiBmaWxsPSJyZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMDUpIiAvPjwvc3ZnPg==');
+            background-size: 100px 100px;
+            opacity: 0.1;
+            z-index: 0;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .page-header h1 {
+            color: #ffffff;
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .page-header h1::before,
+        .page-header h1::after {
+            content: '♔';
+            font-size: 2rem;
+            margin: 0 15px;
+            color: #d4af37;
+            vertical-align: middle;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        .page-header p {
+            color: #e0e0e0;
+            font-size: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .page-header p::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 3px;
+            background: #d4af37;
+            margin: 20px auto 0;
+            border-radius: 2px;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+        
+        /* Powered by Chessdom button - Added from first file */
+        .powered-by {
+            display: inline-block;
+            margin: 20px auto 0;
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .powered-by:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        /* Button Grid Styles */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(2, auto);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        /* Additional Categories Grid */
+        .additional-categories {
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .additional-categories h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .additional-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: auto;
+            gap: 20px;
+        }
+        
+        .calendar-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #2c3e50;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .calendar-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .calendar-btn:hover::before {
+            left: 100%;
+        }
+        
+        .calendar-btn:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+        
+        .calendar-btn i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #d4af37;
+            transition: transform 0.3s ease;
+        }
+        
+        .calendar-btn:hover i {
+            transform: rotate(15deg) scale(1.1);
+        }
+        
+        .calendar-btn h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            position: relative;
+        }
+        
+        .calendar-btn h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: #d4af37;
+            transition: width 0.3s ease;
+        }
+        
+        .calendar-btn:hover h3::after {
+            width: 80%;
+        }
+        
+        /* Date text for calendar buttons */
+        .calendar-btn .event-date {
+            display: block;
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+        
+        body.dark-theme .calendar-btn .event-date {
+            color: #ccc;
+        }
+        
+        /* Featured Events Section - Updated for 3-column layout */
+        .featured-events {
+            background-color: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .featured-events h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #d4af37;
+            padding-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .event-card {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid #d4af37;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeIn 0.5s ease;
+            height: 100%;
+            box-sizing: border-box;
+        }
+        
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .event-card h3 a {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .event-card h3 a:hover {
+            color: #d4af37;
+            text-decoration: underline;
+        }
+        
+        .event-card p {
+            margin-bottom: 10px;
+        }
+        
+        .event-card .event-date {
+            font-weight: bold;
+            color: #d4af37;
+        }
+        
+        .event-card .event-location {
+            font-style: italic;
+        }
+        
+        /* View details button */
+        .event-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #d4af37;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .event-link:hover {
+            background-color: #b59530;
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .event-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .event-nav button {
+            background: #d4af37;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            font-weight: bold;
+        }
+        
+        .event-nav button:hover {
+            background: #b59530;
+            transform: translateY(-2px);
+        }
+        
+        .event-nav button:active {
+            transform: translateY(0);
+        }
+        
+        /* Full Calendar Button */
+        .full-calendar-btn {
+            display: block;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            text-align: center;
+            padding: 15px 20px;
+            margin: 20px 0 40px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .full-calendar-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .full-calendar-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .full-calendar-btn:hover::before {
+            left: 100%;
+        }
+        
+        .full-calendar-btn i {
+            margin-right: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .full-calendar-btn:hover i {
+            transform: translateX(5px);
+        }
+        
+        /* Theme Toggle - UPDATED */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .theme-toggle.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            background: #3a506b;
+        }
+        
+        /* Dark Theme */
+        body.dark-theme {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+        }
+        
+        body.dark-theme .calendar-btn,
+        body.dark-theme .featured-events,
+        body.dark-theme .event-card,
+        body.dark-theme .additional-categories {
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+        }
+        
+        body.dark-theme .page-header {
+            background: linear-gradient(135deg, #121921, #2a3a50);
+        }
+        
+        body.dark-theme .event-card h3,
+        body.dark-theme .featured-events h2,
+        body.dark-theme .additional-categories h2 {
+            color: #f0f0f0;
+        }
+        
+        body.dark-theme .event-card h3 a {
+            color: #f0f0f0;
+        }
+        
+        body.dark-theme .event-card h3 a:hover {
+            color: #d4af37;
+        }
+        
+        body.dark-theme .event-card {
+            border-left-color: #b59530;
+        }
+        
+        /* Dark theme styles for Powered by Chessdom button - Added from first file */
+        body.dark-theme .powered-by {
+            background: rgba(0, 0, 0, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-theme .full-calendar-btn {
+            background: linear-gradient(135deg, #121921, #2a3a50);
+        }
+        
+        body.dark-theme .coming-soon {
+            background-color: #b59530;
+        }
+        
+        body.dark-theme .powered-by:hover {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        
+        /* Coming soon badge */
+        .coming-soon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #d4af37;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 1024px) {
+            .events-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+            
+            .page-header h1 {
+                font-size: 3rem;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .additional-grid {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(2, auto);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .calendar-grid,
+            .additional-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .page-header h1::before,
+            .page-header h1::after {
+                font-size: 1.8rem;
+                margin: 0 10px;
+            }
+            
+            .page-header p {
+                font-size: 1.3rem;
+            }
+            
+            .powered-by {
+                margin-top: 15px;
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .page-header h1::before,
+            .page-header h1::after {
+                font-size: 1.5rem;
+                margin: 0 8px;
+            }
+            
+            /* Adjust theme toggle button for mobile */
+            .theme-toggle {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .theme-toggle span {
+                display: none; /* Hide text on smaller screens */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .calendar-grid,
+            .additional-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .page-header h1::before,
+            .page-header h1::after {
+                display: block;
+                margin: 10px auto;
+            }
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+        <span>Dark Mode</span>
+    </button>
+    
+    <div class="chess-calendar-container">
+        <header class="page-header">
+            <div class="header-content">
+                <h1>The 2025 Chess Calendar</h1>
+                <p>All of the information, no more endless searching.</p>
+                <!-- Added Powered by Chessdom button -->
+                <a href="https://www.chessdom.com" class="powered-by" target="_blank">
+                    <i class="fas fa-chess"></i> Powered by Chessdom
+                </a>
+            </div>
+        </header>
+        
+        <div class="calendar-grid">
+            <!-- Updated links to point to the placeholder URL -->
+            <a href="https://calendar.chessdom.com/top-events/" class="calendar-btn" data-category="top">
+                <i class="fas fa-trophy"></i>
+                <h3>Top Events</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/women/" class="calendar-btn" data-category="women">
+                <i class="fas fa-chess-queen"></i>
+                <h3>Women</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/juniors/" class="calendar-btn" data-category="juniors">
+                <i class="fas fa-chess-pawn"></i>
+                <h3>Juniors</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/seniors/" class="calendar-btn" data-category="seniors">
+                <i class="fas fa-chess-king"></i>
+                <h3>Seniors</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/rapid-blitz/" class="calendar-btn" data-category="rapid-blitz">
+                <i class="fas fa-bolt"></i>
+                <h3>Rapid & Blitz</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/player-calendars" class="calendar-btn" data-category="players">
+                <i class="fas fa-calendar"></i>
+                <h3>Player Calendars</h3>
+                
+            </a>
+            
+            <a href="https://calendar.chessdom.com/africa/" class="calendar-btn" data-category="africa">
+                <i class="fas fa-globe-africa"></i>
+                <h3>Africa</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/northamerica/" class="calendar-btn" data-category="north-america">
+                <i class="fas fa-globe-americas"></i>
+                <h3>North America</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/southamerica/" class="calendar-btn" data-category="south-america">
+                <i class="fas fa-globe-americas"></i>
+                <h3>South America</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/asia/" class="calendar-btn" data-category="asia">
+                <i class="fas fa-globe-asia"></i>
+                <h3>Asia</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/europe/" class="calendar-btn" data-category="europe">
+                <i class="fas fa-globe-europe"></i>
+                <h3>Europe</h3>
+            </a>
+            
+            <a href="https://calendar.chessdom.com/oceania/" class="calendar-btn" data-category="oceania">
+                <i class="fas fa-globe-oceania"></i>
+                <h3>Oceania</h3>
+            </a>
+        </div>
+        
+       
+        
+        <section class="featured-events">
+            <h2>Featured Upcoming Events</h2>
+            <div class="events-grid" id="eventsContainer">
+                <!-- Events will be loaded here by JavaScript -->
+            </div>
+            <div class="event-nav">
+                <button id="prevEvent"><i class="fas fa-chevron-left"></i> Previous</button>
+                <button id="nextEvent">Next <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+        
+        <!-- More Events Section with smaller calendar-style buttons -->
+        <section class="featured-events">
+            <h2>More Upcoming Events</h2>
+            <div class="calendar-grid">
+                <!-- First row of events -->
+               
+                
+                <a href="https://www.chessdom.com/uzchess-cup-2025-participants-and-information/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-chess-bishop"></i>
+                    <h3>UzChess Cup 2025</h3>
+                    <span class="event-date">June 18-June 28</span>
+                </a>
+                
+                <a href="https://calendar.chessdom.com/grand-chess-tour-croatia-2025/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-chess"></i>
+                    <h3>Grand Chess Tour Zagreb</h3>
+                    <span class="event-date">June 30 - July 7</span>
+                </a>
+                
+               
+                 <a href="https://calendar.chessdom.com/wcf-grand-prix-final/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-mountain"></i>
+                    <h3>WCF Grand-Prix Final</h3>
+                    <span class="event-date">July 9-19</span>
+                </a>
+<a href="https://calendar.chessdom.com/biel-international-chess-festival-masters-triathlon-2025/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-chess-queen"></i>
+                    <h3>Biel International Chess Festival</h3>
+                    <span class="event-date">July 12-25</span>
+                </a>
+                <a href="https://calendar.chessdom.com/freestyle-chess-grand-slam-tour-2025-new-york/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-trophy"></i>
+                    <h3>Freestyle Las Vegas</h3>
+                    <span class="event-date">July 17-24</span>
+                </a>
+                
+                <a href="https://www.chessdom.com/dole-open-2025/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-crown"></i>
+                    <h3>Dole Open 2025</h3>
+                    <span class="event-date">July 19-27</span>
+                </a>
+                <!-- Second row of events -->
+<a href="https://www.chessdom.com/oskemen-open-2025//" class="calendar-btn" target="_blank">
+                    <i class="fas fa-chess-queen"></i>
+                    <h3>Oskemen Open 2025</h3>
+                    <span class="event-date">July 20-30</span>
+                </a>
+
+                
+                <a href="https://calendar.chessdom.com/esports-world-cup-2025/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-globe"></i>
+                    <h3>Esports World Cup</h3>
+                    <span class="event-date">July 31 - Aug 8</span>
+                </a>
+                
+              
+                </a>
+                
+                <a href="https://turniejszachy.ug.edu.pl/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-monument"></i>
+                    <h3>University of Gdansk Cup</h3>
+                    <span class="event-date">August 1-10</span>
+                </a>
+                               <a href="https://www.chessdom.com/quantbox-chennai-grand-masters-chess-2025/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-trophy"></i>
+                    <h3>Quantbox Grand Masters 2025</h3>
+                    <span class="event-date">August 6-15</span>
+                <a href="https://www.vardaris.com/el/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-dice"></i>
+                    <h3>Agria International Chess Open 2025</h3>
+                    <span class="event-date">August 27-31</span>
+                </a>
+
+                </a>
+             
+                
+                <a href="https://grandswiss2025.fide.com/" class="calendar-btn" target="_blank">
+                    <i class="fas fa-crown"></i>
+                    <h3>FIDE Grand Swiss 2025</h3>
+                    <span class="event-date">September 3-16</span>
+                </a>
+            </div>
+        </section>
+        
+        <!-- New Additional Categories Section -->
+        <section class="additional-categories featured-events">
+            <h2>Other Calendars</h2>
+            <div class="additional-grid">
+                <a href="https://calendar.chessdom.com/grandmaster-birthdays/" class="calendar-btn" data-category="education">
+                    <i class="fas fa-birthday-cake"></i>
+                    <h3>The Birthday Calendar</h3>
+         
+                </a>
+                
+                <a href="" class="calendar-btn" data-category="national">
+                    <i class="fas fa-flag"></i>
+                    <h3>National Championships</h3>
+                    <span class="coming-soon">Coming Soon</span>
+                </a>
+                
+                <a href="" class="calendar-btn" data-category="engine">
+                    <i class="fas fa-microchip"></i>
+                    <h3>Engine Events</h3>
+                    <span class="coming-soon">Coming Soon</span>
+                </a>
+                
+                <a href="" class="calendar-btn" data-category="freestyle">
+                    <i class="fas fa-random"></i>
+                    <h3>Freestyle Chess</h3>
+                    <span class="coming-soon">Coming Soon</span>
+                </a>
+                
+                <a href="" class="calendar-btn" data-category="player">
+                    <i class="fas fa-user"></i>
+                    <h3>Player Calendars</h3>
+                    <span class="coming-soon">Coming Soon</span>
+                </a>
+                
+                <a href="" class="calendar-btn" data-category="personal">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Your Own Calendar</h3>
+                    <span class="coming-soon">Coming Soon</span>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('themeToggle');
+            const body = document.body;
+            const icon = themeToggle.querySelector('i');
+            const text = themeToggle.querySelector('span');
+            
+            // Check for saved theme preference
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                body.classList.add('dark-theme');
+                icon.classList.replace('fa-moon', 'fa-sun');
+                text.textContent = 'Light Mode';
+            }
+            
+            themeToggle.addEventListener('click', function() {
+                body.classList.toggle('dark-theme');
+                const isDark = body.classList.contains('dark-theme');
+                
+                if (isDark) {
+                    icon.classList.replace('fa-moon', 'fa-sun');
+                    text.textContent = 'Light Mode';
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.classList.replace('fa-sun', 'fa-moon');
+                    text.textContent = 'Dark Mode';
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+            
+            // Scroll event to hide/show the theme toggle button
+            let lastScrollTop = 0;
+            
+            window.addEventListener('scroll', function() {
+                const currentScrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                // Hide button when scrolling down, show when scrolling up
+                if (currentScrollTop > lastScrollTop && currentScrollTop > 100) {
+                    // Scrolling down & past threshold
+                    themeToggle.classList.add('hidden');
+                } else if (currentScrollTop < lastScrollTop || currentScrollTop < 50) {
+                    // Scrolling up or near top
+                    themeToggle.classList.remove('hidden');
+                }
+                
+                lastScrollTop = currentScrollTop;
+            });
+            
+            // Button hover effects with slight delay
+            const buttons = document.querySelectorAll('.calendar-btn');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', function() {
+                    this.style.transitionDelay = '0.1s';
+                });
+                
+                button.addEventListener('mouseleave', function() {
+                    this.style.transitionDelay = '0s';
+                });
+            });
+            
+            const eventsContainer = document.getElementById('eventsContainer');
+            let allEvents = [];
+            let currentEventIndex = 0;
+            const eventsPerPage = 3;
+
+            async function loadUpcomingEvents() {
+                try {
+                    const response = await fetch('https://chess-calendar-production.up.railway.app/api/events/upcoming?limit=50');
+                    const result = await response.json();
+
+                    if (result.success && result.data) {
+                        allEvents = result.data
+                            .filter(event => event.special && event.special.toLowerCase() === 'yes')
+                            .map(event => ({
+                                title: event.title,
+                                date: formatEventDate(event.start_datetime, event.end_datetime),
+                                location: event.location || 'TBA',
+                                description: event.description || event.format || '',
+                                url: event.url || event.landing || '#'
+                            }));
+
+                        showEvents(currentEventIndex);
+                    }
+                } catch (error) {
+                    console.error('Error loading events:', error);
+                    eventsContainer.innerHTML = '<p style="text-align: center; color: #999;">Unable to load events at this time.</p>';
+                }
+            }
+
+            function formatEventDate(startDate, endDate) {
+                const options = { month: 'long', day: 'numeric', year: 'numeric' };
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+
+                if (start.toDateString() === end.toDateString()) {
+                    return start.toLocaleDateString('en-US', options);
+                }
+
+                if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+                    return `${start.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}-${end.getDate()}, ${end.getFullYear()}`;
+                }
+
+                return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', options)}`;
+            }
+            
+            function showEvents(startIndex) {
+                // Clear current events
+                eventsContainer.innerHTML = '';
+                
+                // Calculate end index
+                const endIndex = Math.min(startIndex + eventsPerPage, allEvents.length);
+                
+                // Show events for current page
+                for (let i = startIndex; i < endIndex; i++) {
+                    const event = allEvents[i];
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'event-card';
+                    eventCard.innerHTML = `
+                        <h3><a href="${event.url}" target="_blank">${event.title}</a></h3>
+                        <p class="event-date">${event.date}</p>
+                        <p class="event-location">${event.location}</p>
+                        <p>${event.description}</p>
+                        <a href="${event.url}" class="event-link" target="_blank">View details <i class="fas fa-arrow-right"></i></a>
+                    `;
+                    eventsContainer.appendChild(eventCard);
+                }
+                
+                // Update navigation buttons state
+                document.getElementById('prevEvent').disabled = startIndex === 0;
+                document.getElementById('nextEvent').disabled = endIndex >= allEvents.length;
+            }
+            
+            // Initialize by loading events from API
+            loadUpcomingEvents();
+            
+            // Navigation buttons
+            document.getElementById('prevEvent').addEventListener('click', function() {
+                currentEventIndex = Math.max(0, currentEventIndex - eventsPerPage);
+                showEvents(currentEventIndex);
+            });
+            
+            document.getElementById('nextEvent').addEventListener('click', function() {
+                currentEventIndex = Math.min(allEvents.length - eventsPerPage, currentEventIndex + eventsPerPage);
+                showEvents(currentEventIndex);
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowLeft') {
+                    currentEventIndex = Math.max(0, currentEventIndex - eventsPerPage);
+                    showEvents(currentEventIndex);
+                } else if (e.key === 'ArrowRight') {
+                    currentEventIndex = Math.min(allEvents.length - eventsPerPage, currentEventIndex + eventsPerPage);
+                    showEvents(currentEventIndex);
+                }
+            });
+            
+            // Button click handler - direct to URL instead of showing alert
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Don't prevent default here to allow normal link behavior
+                    
+                    // Ripple effect remains for visual feedback
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.position = 'absolute';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.transform = 'scale(0)';
+                    ripple.style.animation = 'ripple 0.6s linear';
+                    ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+                    
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size/2;
+                    const y = e.clientY - rect.top - size/2;
+                    
+                    ripple.style.width = ripple.style.height = `${size}px`;
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    this.appendChild(ripple);
+                    
+                    // Remove the ripple after animation completes
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+            
+            // Add ripple effect styles dynamically
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+</html>

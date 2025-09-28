@@ -229,6 +229,33 @@ app.get('/api/events', (req, res) => {
   }
 });
 
+// GET upcoming events
+app.get('/api/events/upcoming', (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+    const now = new Date().toISOString();
+
+    const stmt = db.prepare(`
+      SELECT * FROM calendar_events
+      WHERE deleted_at IS NULL
+      AND start_datetime >= ?
+      ORDER BY start_datetime ASC
+      LIMIT ?
+    `);
+
+    const events = stmt.all(now, parseInt(limit));
+
+    res.json({
+      success: true,
+      data: events,
+      returned: events.length
+    });
+  } catch (error) {
+    console.error('Error fetching upcoming events:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch upcoming events' });
+  }
+});
+
 // GET single event
 app.get('/api/events/:id', (req, res) => {
   try {
