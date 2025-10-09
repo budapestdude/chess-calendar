@@ -281,17 +281,53 @@ app.post('/api/events', checkAuth, (req, res) => {
       continent, category, live_games, prize_fund,
       description, venue, landing, players
     } = req.body;
-    
-    if (!title || !url) {
-      return res.status(400).json({ 
-        error: 'Missing required fields: title, url' 
+
+    // Enhanced validation with detailed error messages
+    const validationErrors = [];
+
+    if (!title || title.trim() === '') {
+      validationErrors.push('title is required and cannot be empty');
+    }
+
+    if (!url || url.trim() === '') {
+      validationErrors.push('url is required and cannot be empty');
+    } else {
+      // Basic URL validation
+      try {
+        new URL(url);
+      } catch (e) {
+        validationErrors.push('url must be a valid URL format (e.g., https://example.com)');
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      console.error('[CREATE EVENT] Validation failed:', {
+        title: title || '(missing)',
+        url: url || '(missing)',
+        errors: validationErrors
+      });
+      return res.status(400).json({
+        error: 'Validation failed: ' + validationErrors.join(', '),
+        details: validationErrors,
+        received: { title, url, start_datetime, end_datetime }
       });
     }
-    
+
     // Use current date if start_datetime not provided
     const eventStartTime = start_datetime || new Date().toISOString().slice(0, 19).replace('T', ' ');
     const eventEndTime = end_datetime || eventStartTime;
-    
+
+    // Log the event being created (helpful for debugging)
+    console.log('[CREATE EVENT] Inserting:', {
+      title: title.substring(0, 50) + (title.length > 50 ? '...' : ''),
+      url,
+      start_datetime: eventStartTime,
+      end_datetime: eventEndTime,
+      location: location || '(none)',
+      format: format || '(none)',
+      continent: continent || '(none)'
+    });
+
     const stmt = db.prepare(`
       INSERT INTO calendar_events (
         title, location, start_datetime, end_datetime,
@@ -301,7 +337,7 @@ app.post('/api/events', checkAuth, (req, res) => {
         created_at, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
     `);
-    
+
     const info = stmt.run(
       title, location || '', eventStartTime,
       eventEndTime, event_type || '',
@@ -310,19 +346,40 @@ app.post('/api/events', checkAuth, (req, res) => {
       prize_fund || '', description || '', venue || '',
       landing || '', players || ''
     );
-    
-    res.status(201).json({ 
+
+    console.log(`[CREATE EVENT] ✓ Success: ID ${info.lastInsertRowid} - ${title}`);
+
+    res.status(201).json({
       success: true,
       id: info.lastInsertRowid,
       message: 'Event created successfully'
     });
-    
+
     // Trigger regeneration of JSON files
     regenerateJsonFiles();
-    
+
   } catch (error) {
-    console.error('Error creating event:', error);
-    res.status(500).json({ error: 'Failed to create event' });
+    console.error('[CREATE EVENT] ✗ Database error:', {
+      error: error.message,
+      code: error.code,
+      title: req.body.title || '(missing)',
+      url: req.body.url || '(missing)',
+      stack: error.stack
+    });
+
+    // Provide more helpful error messages
+    let errorMessage = 'Failed to create event';
+    if (error.message.includes('UNIQUE constraint')) {
+      errorMessage = 'Event already exists (duplicate detected)';
+    } else if (error.message.includes('NOT NULL constraint')) {
+      errorMessage = 'Missing required database field';
+    }
+
+    res.status(500).json({
+      error: errorMessage,
+      details: error.message,
+      code: error.code
+    });
   }
 });
 

@@ -959,42 +959,54 @@
             window.location.href = '/login.html';
         }
         
-        // CSV Import function
+        // CSV Import function with enhanced debugging
         async function importCSV() {
             if (!checkAuth()) return;
-            
+
             const fileInput = document.getElementById('csvFile');
             const file = fileInput.files[0];
-            
+
             if (!file) {
                 alert('Please select a CSV file');
                 return;
             }
-            
+
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const csvText = e.target.result;
                 const events = parseCSV(csvText);
-                
+
                 if (events.length === 0) {
                     alert('No valid events found in CSV');
                     return;
                 }
-                
-                document.getElementById('importResults').innerHTML = `<p>Processing ${events.length} events...</p>`;
-                
+
+                document.getElementById('importResults').innerHTML = `
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 4px; margin-bottom: 10px;">
+                        <strong>Processing ${events.length} events...</strong>
+                        <div id="importProgress" style="margin-top: 10px;">Starting import...</div>
+                    </div>
+                `;
+
                 let successCount = 0;
                 let errorCount = 0;
-                const errors = [];
-                
+                const detailedErrors = [];
+
                 const currentToken = sessionStorage.getItem('adminAuthToken') || authToken;
                 if (!currentToken) {
                     alert('No authentication token found. Please authenticate again.');
                     return;
                 }
-                
+
                 // Process events
-                for (const event of events) {
+                for (let i = 0; i < events.length; i++) {
+                    const event = events[i];
+                    const eventNumber = i + 1;
+
+                    // Update progress
+                    document.getElementById('importProgress').innerHTML =
+                        `Processing event ${eventNumber} of ${events.length}: ${event.Name || event.title || 'Untitled'}`;
+
                     try {
                         // Map CSV columns to API fields
                         const eventData = {
@@ -1011,65 +1023,166 @@
                             live_games: event['Live games'] || event.live_games || '',
                             landing: event.Landing || event.landing || ''
                         };
-                        
+
                         // Parse dates
                         const startDate = parseDate(event['Start date'] || event.start_date);
                         const endDate = parseDate(event['End date'] || event.end_date);
-                        
+
+                        // Validation with detailed error messages
                         if (!startDate) {
-                            throw new Error(`Invalid start date for "${eventData.title}"`);
+                            throw new Error(`Invalid or missing start date. Provided: "${event['Start date'] || event.start_date}"`);
                         }
-                        
+
                         if (!eventData.url) {
-                            throw new Error(`Missing URL for "${eventData.title}"`);
+                            throw new Error(`Missing required field: URL`);
                         }
-                        
+
                         eventData.start_datetime = startDate + ' 00:00:00';
                         eventData.end_datetime = (endDate || startDate) + ' 00:00:00';
-                        
+
                         // Parse rounds
                         if (event.Rounds || event.rounds) {
-                            eventData.rounds = parseInt(event.Rounds || event.rounds);
+                            const roundsValue = parseInt(event.Rounds || event.rounds);
+                            if (!isNaN(roundsValue)) {
+                                eventData.rounds = roundsValue;
+                            }
                         }
-                        
+
+                        // Log what we're sending (for debugging)
+                        console.log(`[Import ${eventNumber}] Sending event:`, {
+                            title: eventData.title,
+                            url: eventData.url,
+                            start_datetime: eventData.start_datetime,
+                            end_datetime: eventData.end_datetime,
+                            location: eventData.location,
+                            format: eventData.format
+                        });
+
                         // Send to API
                         const response = await fetch(`${API_BASE}/api/events`, {
                             method: 'POST',
-                            headers: { 
+                            headers: {
                                 'Content-Type': 'application/json',
                                 'Authorization': `Bearer ${currentToken}`
                             },
                             body: JSON.stringify(eventData)
                         });
-                        
+
                         if (response.ok) {
                             successCount++;
+                            console.log(`[Import ${eventNumber}] ✓ Success: ${eventData.title}`);
                         } else {
-                            throw new Error('API error');
+                            // Get detailed error from API response
+                            let apiError = 'Unknown API error';
+                            try {
+                                const errorData = await response.json();
+                                apiError = errorData.error || errorData.message || `HTTP ${response.status}`;
+                            } catch (e) {
+                                apiError = `HTTP ${response.status} ${response.statusText}`;
+                            }
+
+                            const errorDetail = {
+                                event: eventData.title,
+                                row: eventNumber,
+                                reason: apiError,
+                                data: {
+                                    title: eventData.title,
+                                    url: eventData.url,
+                                    start_datetime: eventData.start_datetime,
+                                    location: eventData.location,
+                                    format: eventData.format,
+                                    continent: eventData.continent
+                                }
+                            };
+
+                            console.error(`[Import ${eventNumber}] ✗ Failed:`, errorDetail);
+                            throw new Error(apiError);
                         }
                     } catch (error) {
                         errorCount++;
-                        errors.push(`${event.Name || event.title}: ${error.message}`);
+                        const errorInfo = {
+                            row: eventNumber,
+                            title: event.Name || event.title || 'Untitled',
+                            error: error.message,
+                            csvData: event
+                        };
+                        detailedErrors.push(errorInfo);
+                        console.error(`[Import ${eventNumber}] Error:`, errorInfo);
                     }
                 }
-                
-                // Show results
-                let message = `Import complete! Successfully added ${successCount} events.`;
+
+                // Show detailed results
+                let resultsHTML = '';
+
+                if (successCount > 0) {
+                    resultsHTML += `
+                        <div class="success-message">
+                            ✅ <strong>Success:</strong> ${successCount} event${successCount !== 1 ? 's' : ''} imported successfully
+                        </div>
+                    `;
+                }
+
                 if (errorCount > 0) {
-                    message += ` Failed: ${errorCount} events.`;
-                    if (errors.length <= 5) {
-                        message += '<br>Errors:<br>' + errors.join('<br>');
-                    }
+                    resultsHTML += `
+                        <div class="error-message">
+                            ❌ <strong>Failed:</strong> ${errorCount} event${errorCount !== 1 ? 's' : ''} failed to import
+                        </div>
+                    `;
+
+                    // Show detailed error breakdown
+                    resultsHTML += `
+                        <div style="margin-top: 15px; background: #fff; border: 1px solid #ddd; border-radius: 4px; max-height: 400px; overflow-y: auto;">
+                            <div style="background: #f8f9fa; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0;">
+                                <strong>📋 Error Details</strong> (${errorCount} failed import${errorCount !== 1 ? 's' : ''})
+                            </div>
+                            <div style="padding: 10px;">
+                    `;
+
+                    detailedErrors.forEach((err, index) => {
+                        resultsHTML += `
+                            <div style="border-bottom: 1px solid #eee; padding: 10px 0; ${index === detailedErrors.length - 1 ? 'border-bottom: none;' : ''}">
+                                <div style="font-weight: bold; color: #721c24; margin-bottom: 5px;">
+                                    Row ${err.row}: ${err.title}
+                                </div>
+                                <div style="color: #dc3545; margin-bottom: 8px;">
+                                    <strong>Error:</strong> ${err.error}
+                                </div>
+                                <details style="font-size: 12px; color: #666;">
+                                    <summary style="cursor: pointer; user-select: none;">📊 View CSV Data</summary>
+                                    <pre style="background: #f8f9fa; padding: 8px; border-radius: 3px; margin-top: 5px; overflow-x: auto;">${JSON.stringify(err.csvData, null, 2)}</pre>
+                                </details>
+                            </div>
+                        `;
+                    });
+
+                    resultsHTML += `
+                            </div>
+                        </div>
+                    `;
+
+                    // Add summary tips
+                    resultsHTML += `
+                        <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+                            <strong>💡 Common Issues:</strong>
+                            <ul style="margin: 8px 0 0 20px; font-size: 13px;">
+                                <li><strong>Missing URL:</strong> Every event must have a valid URL</li>
+                                <li><strong>Invalid dates:</strong> Dates should be in format "YYYY-MM-DD" or "Month Day" (e.g., "January 15")</li>
+                                <li><strong>Duplicate events:</strong> Check if the event already exists in the database</li>
+                                <li><strong>Authentication:</strong> Make sure you're still logged in</li>
+                            </ul>
+                        </div>
+                    `;
                 }
-                
-                document.getElementById('importResults').innerHTML = `<div class="success-message">${message}</div>`;
-                
+
+                document.getElementById('importResults').innerHTML = resultsHTML;
+
+                // Refresh events list if any were successful
                 if (successCount > 0) {
                     loadEvents();
                     fileInput.value = '';
                 }
             };
-            
+
             reader.readAsText(file);
         }
         
