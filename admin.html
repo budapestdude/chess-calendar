@@ -1166,7 +1166,15 @@
                             <strong>💡 Common Issues:</strong>
                             <ul style="margin: 8px 0 0 20px; font-size: 13px;">
                                 <li><strong>Missing URL:</strong> Every event must have a valid URL</li>
-                                <li><strong>Invalid dates:</strong> Dates should be in format "YYYY-MM-DD" or "Month Day" (e.g., "January 15")</li>
+                                <li><strong>Invalid dates:</strong> Use UK format DD/MM/YYYY (e.g., "15/01/2025") or YYYY-MM-DD (e.g., "2025-01-15")</li>
+                                <li><strong>Supported date formats:</strong>
+                                    <ul style="margin: 4px 0 0 20px; font-size: 12px;">
+                                        <li>DD/MM/YYYY: 15/01/2025</li>
+                                        <li>DD-MM-YYYY: 15-01-2025</li>
+                                        <li>YYYY-MM-DD: 2025-01-15</li>
+                                        <li>2 January 2025 or January 2, 2025</li>
+                                    </ul>
+                                </li>
                                 <li><strong>Duplicate events:</strong> Check if the event already exists in the database</li>
                                 <li><strong>Authentication:</strong> Make sure you're still logged in</li>
                             </ul>
@@ -1227,36 +1235,119 @@
             return events;
         }
         
-        // Parse date from various formats
+        // Parse date from various formats (UK format: DD/MM/YYYY)
         function parseDate(dateStr) {
             if (!dateStr) return null;
-            
-            // Handle dates like "January 2" by adding current or next year
-            const months = {
-                'January': '01', 'February': '02', 'March': '03', 'April': '04',
-                'May': '05', 'June': '06', 'July': '07', 'August': '08',
-                'September': '09', 'October': '10', 'November': '11', 'December': '12'
-            };
-            
-            // Match patterns like "January 2" or "January 10"
-            const match = dateStr.match(/^(\w+)\s+(\d+)$/);
-            if (match) {
-                const month = months[match[1]];
-                const day = match[2].padStart(2, '0');
-                if (month) {
-                    const currentYear = new Date().getFullYear();
-                    return `${currentYear}-${month}-${day}`;
+
+            const str = dateStr.trim();
+
+            // 1. ISO format (YYYY-MM-DD) - always unambiguous
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+                const date = new Date(str);
+                if (!isNaN(date.getTime())) {
+                    return str;
                 }
             }
-            
-            // Try parsing as standard date
+
+            // 2. UK format with slashes: DD/MM/YYYY or D/M/YYYY
+            const ukSlashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (ukSlashMatch) {
+                const day = ukSlashMatch[1].padStart(2, '0');
+                const month = ukSlashMatch[2].padStart(2, '0');
+                const year = ukSlashMatch[3];
+
+                // Validate the date
+                const monthNum = parseInt(month);
+                const dayNum = parseInt(day);
+                if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31) {
+                    return `${year}-${month}-${day}`;
+                }
+            }
+
+            // 3. UK format with dashes: DD-MM-YYYY or D-M-YYYY
+            const ukDashMatch = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+            if (ukDashMatch) {
+                const day = ukDashMatch[1].padStart(2, '0');
+                const month = ukDashMatch[2].padStart(2, '0');
+                const year = ukDashMatch[3];
+
+                // Validate the date
+                const monthNum = parseInt(month);
+                const dayNum = parseInt(day);
+                if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31) {
+                    return `${year}-${month}-${day}`;
+                }
+            }
+
+            // 4. Short year UK format: DD/MM/YY or DD-MM-YY
+            const ukShortMatch = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+            if (ukShortMatch) {
+                const day = ukShortMatch[1].padStart(2, '0');
+                const month = ukShortMatch[2].padStart(2, '0');
+                let year = parseInt(ukShortMatch[3]);
+
+                // Assume 20xx for years 00-50, 19xx for 51-99
+                year = year <= 50 ? 2000 + year : 1900 + year;
+
+                const monthNum = parseInt(month);
+                const dayNum = parseInt(day);
+                if (monthNum >= 1 && monthNum <= 12 && dayNum >= 1 && dayNum <= 31) {
+                    return `${year}-${month}-${day}`;
+                }
+            }
+
+            // 5. Month name formats: "2 January 2025", "January 2, 2025", "January 2"
+            const months = {
+                'January': '01', 'Jan': '01',
+                'February': '02', 'Feb': '02',
+                'March': '03', 'Mar': '03',
+                'April': '04', 'Apr': '04',
+                'May': '05',
+                'June': '06', 'Jun': '06',
+                'July': '07', 'Jul': '07',
+                'August': '08', 'Aug': '08',
+                'September': '09', 'Sep': '09', 'Sept': '09',
+                'October': '10', 'Oct': '10',
+                'November': '11', 'Nov': '11',
+                'December': '12', 'Dec': '12'
+            };
+
+            // Try "DD Month YYYY" or "DD Month" (UK style)
+            const ukMonthMatch = str.match(/^(\d{1,2})\s+(\w+)(?:\s+(\d{4}))?$/);
+            if (ukMonthMatch) {
+                const day = ukMonthMatch[1].padStart(2, '0');
+                const monthName = ukMonthMatch[2];
+                const year = ukMonthMatch[3] || new Date().getFullYear();
+                const month = months[monthName];
+
+                if (month) {
+                    return `${year}-${month}-${day}`;
+                }
+            }
+
+            // Try "Month DD, YYYY" or "Month DD" (US style)
+            const usMonthMatch = str.match(/^(\w+)\s+(\d{1,2})(?:,?\s+(\d{4}))?$/);
+            if (usMonthMatch) {
+                const monthName = usMonthMatch[1];
+                const day = usMonthMatch[2].padStart(2, '0');
+                const year = usMonthMatch[3] || new Date().getFullYear();
+                const month = months[monthName];
+
+                if (month) {
+                    return `${year}-${month}-${day}`;
+                }
+            }
+
+            // 6. Try various other formats (as fallback, but log warning)
             try {
-                const date = new Date(dateStr);
+                const date = new Date(str);
                 if (!isNaN(date.getTime())) {
+                    console.warn(`[parseDate] Ambiguous date format detected: "${str}" - Please use DD/MM/YYYY or YYYY-MM-DD for clarity`);
                     return date.toISOString().split('T')[0];
                 }
             } catch (e) {}
-            
+
+            console.error(`[parseDate] Failed to parse date: "${str}"`);
             return null;
         }
         
