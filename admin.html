@@ -1084,7 +1084,42 @@
                         });
 
                         if (isDryRun) {
-                            // Dry run mode - just validate, don't send to API
+                            // Dry run mode - validate and check for duplicates
+
+                            // Check if this event already exists in the database
+                            let isDuplicate = false;
+                            let duplicateId = null;
+
+                            try {
+                                // Search for existing events with same title and start date
+                                const searchQuery = new URLSearchParams({
+                                    search: eventData.title,
+                                    limit: 100
+                                });
+                                const searchResponse = await fetch(`${API_BASE}/api/events?${searchQuery}`);
+
+                                if (searchResponse.ok) {
+                                    const searchData = await searchResponse.json();
+                                    const existingEvents = searchData.data || [];
+
+                                    // Check for exact matches (same title, location, and date)
+                                    const exactMatch = existingEvents.find(existing => {
+                                        const titleMatch = existing.title.toLowerCase().trim() === eventData.title.toLowerCase().trim();
+                                        const locationMatch = (existing.location || '').toLowerCase().trim() === (eventData.location || '').toLowerCase().trim();
+                                        const startDateMatch = existing.start_datetime?.split(' ')[0] === eventData.start_datetime?.split(' ')[0];
+
+                                        return titleMatch && locationMatch && startDateMatch;
+                                    });
+
+                                    if (exactMatch) {
+                                        isDuplicate = true;
+                                        duplicateId = exactMatch.id;
+                                    }
+                                }
+                            } catch (e) {
+                                console.warn(`[Dry Run ${eventNumber}] Could not check for duplicates:`, e);
+                            }
+
                             successCount++;
                             validatedEvents.push({
                                 row: eventNumber,
@@ -1094,9 +1129,16 @@
                                 end_datetime: eventData.end_datetime,
                                 url: eventData.url,
                                 format: eventData.format,
-                                continent: eventData.continent
+                                continent: eventData.continent,
+                                isDuplicate: isDuplicate,
+                                duplicateId: duplicateId
                             });
-                            console.log(`[Dry Run ${eventNumber}] ✓ Valid: ${eventData.title}`);
+
+                            if (isDuplicate) {
+                                console.warn(`[Dry Run ${eventNumber}] ⚠️ Duplicate found (ID ${duplicateId}): ${eventData.title}`);
+                            } else {
+                                console.log(`[Dry Run ${eventNumber}] ✓ Valid: ${eventData.title}`);
+                            }
                         } else {
                             // Live import mode - send to API
                             const response = await fetch(`${API_BASE}/api/events`, {
@@ -1157,11 +1199,31 @@
 
                 if (successCount > 0) {
                     if (isDryRun) {
+                        // Count duplicates
+                        const duplicateCount = validatedEvents.filter(evt => evt.isDuplicate).length;
+                        const newEventsCount = validatedEvents.length - duplicateCount;
+
                         resultsHTML += `
                             <div class="success-message">
-                                ✅ <strong>Validation Complete:</strong> ${successCount} event${successCount !== 1 ? 's' : ''} would be imported successfully
+                                ✅ <strong>Validation Complete:</strong> ${successCount} event${successCount !== 1 ? 's' : ''} validated
+                                ${duplicateCount > 0 ? `<br>⚠️ <strong>Warning:</strong> ${duplicateCount} duplicate${duplicateCount !== 1 ? 's' : ''} found (already in database)` : ''}
+                                ${newEventsCount > 0 ? `<br>✨ <strong>${newEventsCount} new event${newEventsCount !== 1 ? 's' : ''}</strong> ready to import` : ''}
                             </div>
                         `;
+
+                        // Show duplicate warning if any found
+                        if (duplicateCount > 0) {
+                            resultsHTML += `
+                                <div style="margin-top: 15px; padding: 12px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+                                    <strong>⚠️ Duplicates Detected</strong>
+                                    <div style="margin-top: 6px; font-size: 13px;">
+                                        ${duplicateCount} event${duplicateCount !== 1 ? 's' : ''} in your CSV already exist${duplicateCount === 1 ? 's' : ''} in the database.
+                                        These are marked with <span style="background: #fff3cd; padding: 2px 6px; border-radius: 3px; font-size: 11px; border: 1px solid #ffc107;">⚠️ DUPLICATE</span> below.
+                                        If you proceed with import, they will be added again as duplicates.
+                                    </div>
+                                </div>
+                            `;
+                        }
 
                         // Show preview of first 10 valid events
                         const previewCount = Math.min(10, validatedEvents.length);
@@ -1170,20 +1232,25 @@
                                 <div style="background: #d4edda; padding: 10px; border-bottom: 1px solid #28a745; font-weight: bold;">
                                     📋 Preview - First ${previewCount} Events (out of ${validatedEvents.length} valid)
                                 </div>
-                                <div style="padding: 10px; max-height: 300px; overflow-y: auto;">
+                                <div style="padding: 10px; max-height: 400px; overflow-y: auto;">
                         `;
 
                         validatedEvents.slice(0, previewCount).forEach((evt, idx) => {
+                            const bgColor = evt.isDuplicate ? '#fffbf0' : '#fff';
+                            const borderColor = evt.isDuplicate ? '#ffc107' : '#eee';
+
                             resultsHTML += `
-                                <div style="border-bottom: 1px solid #eee; padding: 10px 0; ${idx === previewCount - 1 ? 'border-bottom: none;' : ''}">
-                                    <div style="font-weight: bold; margin-bottom: 4px;">
-                                        ${evt.row}. ${evt.title}
+                                <div style="border: 1px solid ${borderColor}; border-radius: 4px; padding: 10px; margin-bottom: 10px; background: ${bgColor};">
+                                    <div style="font-weight: bold; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;">
+                                        <span>${evt.row}. ${evt.title}</span>
+                                        ${evt.isDuplicate ? '<span style="background: #fff3cd; padding: 2px 6px; border-radius: 3px; font-size: 11px; border: 1px solid #ffc107;">⚠️ DUPLICATE</span>' : '<span style="background: #d4edda; padding: 2px 6px; border-radius: 3px; font-size: 11px; border: 1px solid #28a745;">✨ NEW</span>'}
                                     </div>
                                     <div style="font-size: 12px; color: #666;">
                                         📅 ${evt.start_datetime.split(' ')[0]} ${evt.end_datetime ? '→ ' + evt.end_datetime.split(' ')[0] : ''}<br>
                                         📍 ${evt.location || '(No location)'} ${evt.continent ? '(' + evt.continent + ')' : ''}<br>
                                         🎮 ${evt.format || '(No format)'}<br>
                                         🔗 <a href="${evt.url}" target="_blank" style="font-size: 11px;">${evt.url.substring(0, 50)}${evt.url.length > 50 ? '...' : ''}</a>
+                                        ${evt.isDuplicate ? `<br><span style="color: #856404;">⚠️ Matches existing event ID ${evt.duplicateId}</span>` : ''}
                                     </div>
                                 </div>
                             `;
@@ -1195,23 +1262,50 @@
                         `;
 
                         if (validatedEvents.length > previewCount) {
+                            const remainingDuplicates = validatedEvents.slice(previewCount).filter(evt => evt.isDuplicate).length;
+                            const remainingNew = validatedEvents.length - previewCount - remainingDuplicates;
+
                             resultsHTML += `
                                 <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 13px; color: #666;">
-                                    ... and ${validatedEvents.length - previewCount} more event${validatedEvents.length - previewCount !== 1 ? 's' : ''} ready to import
+                                    ... and ${validatedEvents.length - previewCount} more:
+                                    ${remainingNew > 0 ? `<strong>${remainingNew} new</strong>` : ''}
+                                    ${remainingNew > 0 && remainingDuplicates > 0 ? ', ' : ''}
+                                    ${remainingDuplicates > 0 ? `<strong style="color: #856404;">${remainingDuplicates} duplicate${remainingDuplicates !== 1 ? 's' : ''}</strong>` : ''}
                                 </div>
                             `;
                         }
 
                         // Add button to proceed with actual import
                         if (errorCount === 0) {
-                            resultsHTML += `
-                                <div style="margin-top: 15px; padding: 15px; background: #d1ecf1; border: 1px solid #0c5460; border-radius: 4px;">
-                                    <strong>✅ Ready to Import</strong>
-                                    <div style="margin: 10px 0; font-size: 14px;">
-                                        All ${successCount} events passed validation. Uncheck "Dry Run Mode" and click "Import CSV" again to add them to the database.
+                            if (duplicateCount > 0 && newEventsCount > 0) {
+                                resultsHTML += `
+                                    <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+                                        <strong>⚠️ Mixed Results</strong>
+                                        <div style="margin: 10px 0; font-size: 14px;">
+                                            ${newEventsCount} new event${newEventsCount !== 1 ? 's' : ''} ready to import, but ${duplicateCount} duplicate${duplicateCount !== 1 ? 's' : ''} detected.
+                                            Remove duplicates from your CSV, or proceed to import all (including duplicates).
+                                        </div>
                                     </div>
-                                </div>
-                            `;
+                                `;
+                            } else if (duplicateCount === 0) {
+                                resultsHTML += `
+                                    <div style="margin-top: 15px; padding: 15px; background: #d1ecf1; border: 1px solid #0c5460; border-radius: 4px;">
+                                        <strong>✅ Ready to Import</strong>
+                                        <div style="margin: 10px 0; font-size: 14px;">
+                                            All ${successCount} events passed validation with no duplicates found. Uncheck "Dry Run Mode" and click "Import CSV" again to add them to the database.
+                                        </div>
+                                    </div>
+                                `;
+                            } else {
+                                resultsHTML += `
+                                    <div style="margin-top: 15px; padding: 15px; background: #f8d7da; border: 1px solid #dc3545; border-radius: 4px;">
+                                        <strong>❌ All Events Are Duplicates</strong>
+                                        <div style="margin: 10px 0; font-size: 14px;">
+                                            All ${duplicateCount} event${duplicateCount !== 1 ? 's' : ''} in this CSV already exist in the database. Importing would create duplicates.
+                                        </div>
+                                    </div>
+                                `;
+                            }
                         }
                     } else {
                         resultsHTML += `
