@@ -424,7 +424,24 @@
             <div id="importTab" class="content-section hidden">
                 <h3>Bulk Import from CSV</h3>
                 <p>Upload a CSV file with tournament data</p>
-                <input type="file" id="csvFile" accept=".csv">
+
+                <div style="margin-bottom: 15px;">
+                    <input type="file" id="csvFile" accept=".csv">
+                </div>
+
+                <div style="background: #e7f3ff; border: 1px solid #0d6efd; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="dryRunMode" style="margin-right: 10px; width: 18px; height: 18px; cursor: pointer;">
+                        <div>
+                            <strong style="font-size: 15px;">🧪 Dry Run Mode (Test Import)</strong>
+                            <div style="font-size: 13px; color: #084298; margin-top: 4px;">
+                                Preview what would be imported without actually adding events to the database.
+                                Use this to test large files and check for errors before doing the real import.
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
                 <button class="btn btn-primary" onclick="importCSV()">Import CSV</button>
                 <div id="importResults"></div>
             </div>
@@ -965,6 +982,7 @@
 
             const fileInput = document.getElementById('csvFile');
             const file = fileInput.files[0];
+            const isDryRun = document.getElementById('dryRunMode').checked;
 
             if (!file) {
                 alert('Please select a CSV file');
@@ -981,19 +999,26 @@
                     return;
                 }
 
+                const modeLabel = isDryRun ? '🧪 DRY RUN TEST' : 'LIVE IMPORT';
+                const modeBg = isDryRun ? '#fff3cd' : '#e7f3ff';
+                const modeBorder = isDryRun ? '#ffc107' : '#0d6efd';
+
                 document.getElementById('importResults').innerHTML = `
-                    <div style="background: #e7f3ff; padding: 15px; border-radius: 4px; margin-bottom: 10px;">
+                    <div style="background: ${modeBg}; border: 2px solid ${modeBorder}; padding: 15px; border-radius: 4px; margin-bottom: 10px;">
+                        <div style="font-weight: bold; font-size: 16px; margin-bottom: 8px;">${modeLabel}</div>
                         <strong>Processing ${events.length} events...</strong>
-                        <div id="importProgress" style="margin-top: 10px;">Starting import...</div>
+                        ${isDryRun ? '<div style="margin-top: 8px; color: #856404;">No events will be added to the database (test mode)</div>' : ''}
+                        <div id="importProgress" style="margin-top: 10px;">Starting ${isDryRun ? 'validation' : 'import'}...</div>
                     </div>
                 `;
 
                 let successCount = 0;
                 let errorCount = 0;
                 const detailedErrors = [];
+                const validatedEvents = []; // For dry run preview
 
                 const currentToken = sessionStorage.getItem('adminAuthToken') || authToken;
-                if (!currentToken) {
+                if (!currentToken && !isDryRun) {
                     alert('No authentication token found. Please authenticate again.');
                     return;
                 }
@@ -1005,7 +1030,7 @@
 
                     // Update progress
                     document.getElementById('importProgress').innerHTML =
-                        `Processing event ${eventNumber} of ${events.length}: ${event.Name || event.title || 'Untitled'}`;
+                        `${isDryRun ? 'Validating' : 'Processing'} event ${eventNumber} of ${events.length}: ${event.Name || event.title || 'Untitled'}`;
 
                     try {
                         // Map CSV columns to API fields
@@ -1049,7 +1074,7 @@
                         }
 
                         // Log what we're sending (for debugging)
-                        console.log(`[Import ${eventNumber}] Sending event:`, {
+                        console.log(`[Import ${eventNumber}] ${isDryRun ? 'Validating' : 'Sending'} event:`, {
                             title: eventData.title,
                             url: eventData.url,
                             start_datetime: eventData.start_datetime,
@@ -1058,45 +1083,61 @@
                             format: eventData.format
                         });
 
-                        // Send to API
-                        const response = await fetch(`${API_BASE}/api/events`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${currentToken}`
-                            },
-                            body: JSON.stringify(eventData)
-                        });
-
-                        if (response.ok) {
+                        if (isDryRun) {
+                            // Dry run mode - just validate, don't send to API
                             successCount++;
-                            console.log(`[Import ${eventNumber}] ✓ Success: ${eventData.title}`);
-                        } else {
-                            // Get detailed error from API response
-                            let apiError = 'Unknown API error';
-                            try {
-                                const errorData = await response.json();
-                                apiError = errorData.error || errorData.message || `HTTP ${response.status}`;
-                            } catch (e) {
-                                apiError = `HTTP ${response.status} ${response.statusText}`;
-                            }
-
-                            const errorDetail = {
-                                event: eventData.title,
+                            validatedEvents.push({
                                 row: eventNumber,
-                                reason: apiError,
-                                data: {
-                                    title: eventData.title,
-                                    url: eventData.url,
-                                    start_datetime: eventData.start_datetime,
-                                    location: eventData.location,
-                                    format: eventData.format,
-                                    continent: eventData.continent
-                                }
-                            };
+                                title: eventData.title,
+                                location: eventData.location,
+                                start_datetime: eventData.start_datetime,
+                                end_datetime: eventData.end_datetime,
+                                url: eventData.url,
+                                format: eventData.format,
+                                continent: eventData.continent
+                            });
+                            console.log(`[Dry Run ${eventNumber}] ✓ Valid: ${eventData.title}`);
+                        } else {
+                            // Live import mode - send to API
+                            const response = await fetch(`${API_BASE}/api/events`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${currentToken}`
+                                },
+                                body: JSON.stringify(eventData)
+                            });
 
-                            console.error(`[Import ${eventNumber}] ✗ Failed:`, errorDetail);
-                            throw new Error(apiError);
+                            if (response.ok) {
+                                successCount++;
+                                console.log(`[Import ${eventNumber}] ✓ Success: ${eventData.title}`);
+                            } else {
+                                // Get detailed error from API response
+                                let apiError = 'Unknown API error';
+                                try {
+                                    const errorData = await response.json();
+                                    apiError = errorData.error || errorData.message || `HTTP ${response.status}`;
+                                } catch (e) {
+                                    apiError = `HTTP ${response.status} ${response.statusText}`;
+                                }
+
+                                const errorDetail = {
+                                    event: eventData.title,
+                                    row: eventNumber,
+                                    reason: apiError,
+                                    data: {
+                                        title: eventData.title,
+                                        url: eventData.url,
+                                        start_datetime: eventData.start_datetime,
+                                        location: eventData.location,
+                                        format: eventData.format,
+                                        continent: eventData.continent
+                                    }
+                                };
+
+                                console.error(`[Import ${eventNumber}] ✗ Failed:`, errorDetail);
+                                throw new Error(apiError);
+                            }
                         }
                     } catch (error) {
                         errorCount++;
@@ -1115,17 +1156,76 @@
                 let resultsHTML = '';
 
                 if (successCount > 0) {
-                    resultsHTML += `
-                        <div class="success-message">
-                            ✅ <strong>Success:</strong> ${successCount} event${successCount !== 1 ? 's' : ''} imported successfully
-                        </div>
-                    `;
+                    if (isDryRun) {
+                        resultsHTML += `
+                            <div class="success-message">
+                                ✅ <strong>Validation Complete:</strong> ${successCount} event${successCount !== 1 ? 's' : ''} would be imported successfully
+                            </div>
+                        `;
+
+                        // Show preview of first 10 valid events
+                        const previewCount = Math.min(10, validatedEvents.length);
+                        resultsHTML += `
+                            <div style="margin-top: 15px; background: #fff; border: 1px solid #28a745; border-radius: 4px;">
+                                <div style="background: #d4edda; padding: 10px; border-bottom: 1px solid #28a745; font-weight: bold;">
+                                    📋 Preview - First ${previewCount} Events (out of ${validatedEvents.length} valid)
+                                </div>
+                                <div style="padding: 10px; max-height: 300px; overflow-y: auto;">
+                        `;
+
+                        validatedEvents.slice(0, previewCount).forEach((evt, idx) => {
+                            resultsHTML += `
+                                <div style="border-bottom: 1px solid #eee; padding: 10px 0; ${idx === previewCount - 1 ? 'border-bottom: none;' : ''}">
+                                    <div style="font-weight: bold; margin-bottom: 4px;">
+                                        ${evt.row}. ${evt.title}
+                                    </div>
+                                    <div style="font-size: 12px; color: #666;">
+                                        📅 ${evt.start_datetime.split(' ')[0]} ${evt.end_datetime ? '→ ' + evt.end_datetime.split(' ')[0] : ''}<br>
+                                        📍 ${evt.location || '(No location)'} ${evt.continent ? '(' + evt.continent + ')' : ''}<br>
+                                        🎮 ${evt.format || '(No format)'}<br>
+                                        🔗 <a href="${evt.url}" target="_blank" style="font-size: 11px;">${evt.url.substring(0, 50)}${evt.url.length > 50 ? '...' : ''}</a>
+                                    </div>
+                                </div>
+                            `;
+                        });
+
+                        resultsHTML += `
+                                </div>
+                            </div>
+                        `;
+
+                        if (validatedEvents.length > previewCount) {
+                            resultsHTML += `
+                                <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 13px; color: #666;">
+                                    ... and ${validatedEvents.length - previewCount} more event${validatedEvents.length - previewCount !== 1 ? 's' : ''} ready to import
+                                </div>
+                            `;
+                        }
+
+                        // Add button to proceed with actual import
+                        if (errorCount === 0) {
+                            resultsHTML += `
+                                <div style="margin-top: 15px; padding: 15px; background: #d1ecf1; border: 1px solid #0c5460; border-radius: 4px;">
+                                    <strong>✅ Ready to Import</strong>
+                                    <div style="margin: 10px 0; font-size: 14px;">
+                                        All ${successCount} events passed validation. Uncheck "Dry Run Mode" and click "Import CSV" again to add them to the database.
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        resultsHTML += `
+                            <div class="success-message">
+                                ✅ <strong>Success:</strong> ${successCount} event${successCount !== 1 ? 's' : ''} imported successfully
+                            </div>
+                        `;
+                    }
                 }
 
                 if (errorCount > 0) {
                     resultsHTML += `
                         <div class="error-message">
-                            ❌ <strong>Failed:</strong> ${errorCount} event${errorCount !== 1 ? 's' : ''} failed to import
+                            ❌ <strong>${isDryRun ? 'Validation Errors' : 'Failed'}:</strong> ${errorCount} event${errorCount !== 1 ? 's' : ''} ${isDryRun ? 'failed validation' : 'failed to import'}
                         </div>
                     `;
 
@@ -1184,8 +1284,8 @@
 
                 document.getElementById('importResults').innerHTML = resultsHTML;
 
-                // Refresh events list if any were successful
-                if (successCount > 0) {
+                // Refresh events list if any were successfully imported (not in dry run mode)
+                if (successCount > 0 && !isDryRun) {
                     loadEvents();
                     fileInput.value = '';
                 }
