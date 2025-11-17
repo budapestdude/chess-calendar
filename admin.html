@@ -610,7 +610,7 @@
         
         async function loadEvents() {
             try {
-                const response = await fetch(`${API_BASE}/api/events?limit=2000`);
+                const response = await fetch(`${API_BASE}/api/events?limit=5000`);
                 const data = await response.json();
                 allEvents = data.data || [];
                 displayEvents(allEvents);
