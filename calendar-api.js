@@ -45,15 +45,15 @@ app.use(express.static(__dirname, {
 // Get all events or filter by query parameters
 app.get('/api/events', (req, res) => {
   try {
-    const { 
-      start_date, 
-      end_date, 
+    const {
+      start_date,
+      end_date,
       location,
       continent,
       type,
       format,
       search,
-      limit = 100, 
+      limit = 5000,
       offset = 0
     } = req.query;
 

@@ -81,7 +81,7 @@ async function loadEvents() {
     const continent = document.getElementById('continentFilter').value;
     const format = document.getElementById('formatFilter').value;
     
-    let url = `${API_URL}/events?limit=50`;
+    let url = `${API_URL}/events?limit=5000`;
     
     if (currentTab === 'upcoming') {
         const today = new Date().toISOString().split('T')[0];
@@ -148,7 +148,7 @@ async function loadStats() {
         
         // Calculate upcoming events
         const today = new Date().toISOString().split('T')[0];
-        const upcomingResponse = await fetch(`${API_URL}/events?start_date=${today}&limit=1000`);
+        const upcomingResponse = await fetch(`${API_URL}/events?start_date=${today}&limit=5000`);
         const upcomingData = await upcomingResponse.json();
         document.getElementById('upcomingEvents').textContent = upcomingData.pagination?.total || '0';
         
@@ -170,7 +170,7 @@ async function handleSearch() {
     }
     
     try {
-        const response = await fetch(`${API_URL}/events?search=${encodeURIComponent(searchTerm)}&limit=50`);
+        const response = await fetch(`${API_URL}/events?search=${encodeURIComponent(searchTerm)}&limit=5000`);
         const data = await response.json();
         
         if (data.data) {

@@ -180,7 +180,7 @@ function checkAuth(req, res, next) {
 // GET all events
 app.get('/api/events', (req, res) => {
   try {
-    const { special, continent, format, search, limit = 1000, offset = 0 } = req.query;
+    const { special, continent, format, search, limit = 5000, offset = 0 } = req.query;
     
     let query = 'SELECT * FROM calendar_events WHERE deleted_at IS NULL';
     const params = [];
