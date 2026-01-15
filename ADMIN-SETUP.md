@@ -3,7 +3,7 @@
 ## Local Development
 
 1. Access the admin panel at: http://localhost:3000/admin
-2. Use the default token: `your-secret-admin-token-2025`
+2. Use the default token: `your-secret-admin-token-2026`
 3. Enter the token in the yellow authentication box and click "Authenticate"
 
 ## Production (Railway)

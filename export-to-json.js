@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 
 // Open the database
-const db = new Database('calendar.db', { readonly: true });
+const db = new Database('calendar-2026.db', { readonly: true });
 
 // Get all events
 const stmt = db.prepare(`

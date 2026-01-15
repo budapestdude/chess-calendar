@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Database connection
-const DB_PATH = process.env.NODE_ENV === 'production' ? '/app/calendar.db' : 'calendar.db';
+const DB_PATH = process.env.NODE_ENV === 'production' ? '/app/calendar-2026.db' : 'calendar-2026.db';
 const BACKUP_DIR = process.env.NODE_ENV === 'production' ? '/app/backups' : './backups';
 const db = new Database(DB_PATH, { readonly: false });
 
@@ -157,7 +157,7 @@ app.use(express.static(__dirname, {
 }));
 
 // Simple authentication (you should use proper auth in production)
-const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'your-secret-admin-token-2025';
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'your-secret-admin-token-2026';
 
 function checkAuth(req, res, next) {
   const authHeader = req.headers.authorization;

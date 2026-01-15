@@ -4,7 +4,7 @@ const Database = require('better-sqlite3');
 const path = require('path');
 
 // Create/open SQLite database
-const db = new Database('calendar.db');
+const db = new Database('calendar-2026.db');
 
 // Initialize database schema
 const initSQL = fs.readFileSync('./database/init-sqlite.sql', 'utf8');
@@ -143,7 +143,7 @@ async function importChessCalendar() {
             }
           }
           console.log(`📊 Total processed: ${events.length} rows`);
-          console.log('\n📁 Database saved as: calendar.db');
+          console.log('\n📁 Database saved as: calendar-2026.db');
           
           // Show sample of imported data
           console.log('\n📋 Sample of imported events:');

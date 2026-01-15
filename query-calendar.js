@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const Database = require('better-sqlite3');
-const db = new Database('calendar.db', { readonly: true });
+const db = new Database('calendar-2026.db', { readonly: true });
 
 const command = process.argv[2];
 const arg = process.argv[3];
